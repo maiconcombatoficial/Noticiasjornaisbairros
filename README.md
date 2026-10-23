@@ -86,13 +86,13 @@ Nesse modo o botão "atualizar" do app dispara uma coleta na hora.
 
 - **Copiar link / Compartilhar**: botões em cada notícia. "Copiar link" coloca o endereço da matéria na área de
   transferência; "Compartilhar" abre o menu do celular (WhatsApp, Instagram, etc.).
-- **Ler depois**: arraste a notícia para a direita (ou toque em "Ler depois"). Ela ganha a marca 🔖 e entra na lista
-  "Ler depois"; lá, arrastar para a direita remove e para a esquerda arquiva.
+- **Ler depois**: arraste a notícia para a direita (ou toque em "Ler depois"). Ela sai da lista principal e vai para
+  "Ler depois"; lá, arrastar para a direita devolve à lista principal e para a esquerda arquiva.
 - **Arquivar**: arraste a notícia para a esquerda (ou toque em "Arquivar"). Ela some da lista e vai para "Arquivadas",
   onde pode ser restaurada arrastando para a direita. A lista fica salva só no aparelho.
 - **Notícias**: puxe a lista para baixo (ou toque no ícone de atualizar). O rodapé mostra a hora da última coleta.
 - **O app em si**: quando uma versão nova é publicada, aparece a faixa "Nova versão do app disponível" com o botão
-  **Atualizar agora**. O número da versão fica no rodapé (`app v1.15`). Ao mudar o app, altere `APP_VERSAO` em
+  **Atualizar agora**. O número da versão fica no rodapé (`app v1.16`). Ao mudar o app, altere `APP_VERSAO` em
   `web/app.js` e `VERSAO` em `web/sw.js` para o mesmo valor.
 
 ## Senha de acesso (proteção simples)

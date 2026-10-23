@@ -11,7 +11,7 @@
     puxar: $('#puxar'), puxarTexto: $('.puxar-texto'), avisoVersao: $('#aviso-versao'), btnVersao: $('#btn-versao'), toast: $('#toast'), versao: $('#versao'),
     toastTexto: $('#toast-texto'), toastAcao: $('#toast-acao'), btnArquivadas: $('#btn-arquivadas'), btnLerDepois: $('#btn-lerdepois'), btnPautas: $('#btn-pautas'), btnAgenda: $('#btn-agenda'), subAgenda: $('#sub-agenda'), selFormato: $('#sel-formato'), selTema: $('#sel-tema'),
   };
-  const APP_VERSAO = '1.15';
+  const APP_VERSAO = '1.16';
   const PAGINA = 40;
   const estado = { regiao: 'todas', bairro: '', assunto: '', q: '', horas: 72, incluirGeral: true, pagina: 1, visao: 'normal', pauta: false, agenda: false, formato: '', tema: '' };
   let dados = { noticias: [], contagem: { regioes: {}, bairros: {} } };
@@ -111,7 +111,7 @@
   function naVisao(n) {
     if (estado.visao === 'arquivadas') return estaArquivada(n);
     if (estado.visao === 'lerdepois') return lerDepois.tem(n) && !estaArquivada(n);
-    return !estaArquivada(n);
+    return !estaArquivada(n) && !lerDepois.tem(n); // guardada em Ler depois sai da lista principal
   }
   function filtrar() {
     const limite = estado.horas ? Date.now() - estado.horas * 3600e3 : 0;
@@ -289,18 +289,17 @@
     const fundo = $('.card-fundo', frag);
     const btArquivar = $('.arquivar', frag);
     const btLerDepois = $('.lerdepois', frag);
-    const salvo = lerDepois.tem(n);
     // O que cada lado do arrasto faz depende da lista que está aberta
     const acaoArquivar = { rotulo: 'Arquivar', cor: '#ef4444', executar: () => { arquivadas.adicionar(n); toast('Notícia arquivada', 4000, { rotulo: 'Desfazer', ao: () => { arquivadas.remover(n); render(); } }); } };
     const acaoRestaurar = { rotulo: 'Restaurar', cor: '#10b981', executar: () => { arquivadas.remover(n); toast('Notícia restaurada'); } };
-    const acaoSalvar = { rotulo: 'Ler depois', cor: '#0b5fff', executar: () => { lerDepois.adicionar(n); toast('Salva em Ler depois', 2500, { rotulo: 'Ver lista', ao: () => { estado.visao = 'lerdepois'; estado.pagina = 1; render(); window.scrollTo({ top: 0 }); } }); }, semSumir: true };
-    const acaoRemover = { rotulo: 'Remover', cor: '#64748b', executar: () => { lerDepois.remover(n); toast('Removida de Ler depois', 4000, { rotulo: 'Desfazer', ao: () => { lerDepois.adicionar(n); render(); } }); } };
+    const acaoSalvar = { rotulo: 'Ler depois', cor: '#0b5fff', executar: () => { lerDepois.adicionar(n); toast('Guardada em Ler depois', 4000, { rotulo: 'Desfazer', ao: () => { lerDepois.remover(n); render(); } }); } };
+    const acaoRemover = { rotulo: 'Devolver', cor: '#64748b', executar: () => { lerDepois.remover(n); toast('Devolvida à lista principal', 4000, { rotulo: 'Desfazer', ao: () => { lerDepois.adicionar(n); render(); } }); } };
     let esquerda = null, direita = null;
     if (estado.visao === 'arquivadas') { direita = acaoRestaurar; }
     else if (estado.visao === 'lerdepois') { esquerda = acaoArquivar; direita = acaoRemover; }
-    else { esquerda = acaoArquivar; direita = salvo ? acaoRemover : acaoSalvar; }
+    else { esquerda = acaoArquivar; direita = acaoSalvar; }
     $('span', btArquivar).textContent = estado.visao === 'arquivadas' ? 'Restaurar' : 'Arquivar';
-    $('span', btLerDepois).textContent = salvo ? 'Salvo' : 'Ler depois';
+    $('span', btLerDepois).textContent = estado.visao === 'lerdepois' ? 'Devolver' : 'Ler depois';
     btLerDepois.classList.toggle('salvo', salvo);
     function executar(acao, direcao) {
       if (acao.semSumir) { movel.classList.add('animando'); movel.style.transform = ''; acao.executar(); setTimeout(render, 150); return; }
@@ -309,7 +308,7 @@
       setTimeout(() => { acao.executar(); render(); }, 230);
     }
     btArquivar.onclick = (e) => { e.preventDefault(); e.stopPropagation(); executar(estado.visao === 'arquivadas' ? acaoRestaurar : acaoArquivar, estado.visao === 'arquivadas' ? 1 : -1); };
-    btLerDepois.onclick = (e) => { e.preventDefault(); e.stopPropagation(); executar(salvo ? acaoRemover : acaoSalvar, 1); };
+    btLerDepois.onclick = (e) => { e.preventDefault(); e.stopPropagation(); executar(estado.visao === 'lerdepois' ? acaoRemover : acaoSalvar, 1); };
     // arrastar para os lados (celular)
     let x0 = null, y0 = null, dx = 0, modo = null;
     artigo.addEventListener('touchstart', (e) => { if (e.touches.length !== 1) return; x0 = e.touches[0].clientX; y0 = e.touches[0].clientY; dx = 0; modo = null; movel.classList.remove('animando'); }, { passive: true });
@@ -348,7 +347,6 @@
     $('.titulo', frag).appendChild(destacar(n.titulo, estado.q.trim()));
     if (n.resumo && norm(n.resumo) !== norm(n.titulo)) $('.resumo', frag).appendChild(destacar(n.resumo, estado.q.trim()));
     const tags = $('.tags', frag);
-    if (salvo && estado.visao === 'normal') { const s = document.createElement('span'); s.className = 'tag salvo'; s.textContent = '🔖 Ler depois'; tags.appendChild(s); }
     const regioesComBairro = new Set(n.bairros.map((b) => mapaBairro.get(b)?.regiao));
     for (const rid of n.regioes) {
       if (regioesComBairro.has(rid)) continue;
@@ -427,7 +425,7 @@
       el.vazioDica.textContent = estado.visao === 'arquivadas'
         ? 'Arraste uma notícia para a esquerda (ou toque em Arquivar) para guardá-la aqui.'
         : estado.visao === 'lerdepois'
-        ? 'Arraste uma notícia para a direita (ou toque em Ler depois) para guardá-la aqui.'
+        ? 'Arraste uma notícia para a direita (ou toque em Ler depois) para guardá-la aqui. Daqui, arrastar para a direita devolve à lista e para a esquerda arquiva.'
         : dados.noticias.length
         ? 'Tente outro período, outro bairro ou veja as notícias gerais de Floripa.'
         : 'A primeira coleta ainda não rodou. Em modo servidor ela começa sozinha; no GitHub Pages, aguarde a ação agendada.';
