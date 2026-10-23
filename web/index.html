@@ -15,6 +15,11 @@
 <link rel="stylesheet" href="app.css">
 </head>
 <body>
+<div id="puxar" class="puxar" aria-hidden="true"><span class="puxar-icone">↓</span><span class="puxar-texto">Puxe para atualizar</span></div>
+<div id="aviso-versao" class="aviso-versao" hidden>
+  <span>Nova versão do app disponível.</span>
+  <button id="btn-versao">Atualizar agora</button>
+</div>
 <header class="topo">
   <div class="topo-linha">
     <a class="marca" href="#/">
@@ -61,9 +66,11 @@
 <footer class="rodape">
   <span id="atualizado"></span>
   <span id="fontes-ok"></span>
+  <span id="versao"></span>
   <a href="https://github.com/maiconcombatoficial/Noticiasjornaisbairros" target="_blank" rel="noopener">código</a>
 </footer>
 
+<div id="toast" class="toast" hidden></div>
 <dialog id="dlg-fontes" class="painel">
   <div class="painel-cabecalho">
     <h2>Fontes</h2>

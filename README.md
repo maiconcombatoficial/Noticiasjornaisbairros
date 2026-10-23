@@ -63,6 +63,13 @@ docker run -d -p 3000:3000 -v floripa-dados:/app/data floripa-bairros
 Funciona também em Render, Railway, Fly.io etc. (comando `npm start`, porta `PORT`).
 Nesse modo o botão "atualizar" do app dispara uma coleta na hora.
 
+## Atualizações no celular
+
+- **Notícias**: puxe a lista para baixo (ou toque no ícone de atualizar). O rodapé mostra a hora da última coleta.
+- **O app em si**: quando uma versão nova é publicada, aparece a faixa "Nova versão do app disponível" com o botão
+  **Atualizar agora**. O número da versão fica no rodapé (`app v1.3`). Ao mudar o app, altere `APP_VERSAO` em
+  `web/app.js` e `VERSAO` em `web/sw.js` para o mesmo valor.
+
 ## Personalizando
 
 - **Fontes**: edite `src/fontes.json`. Para um portal com feed, adicione `{ "id", "nome", "tipo": "rss", "url", "escopo" }`.

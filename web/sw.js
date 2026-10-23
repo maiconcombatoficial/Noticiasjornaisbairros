@@ -1,12 +1,16 @@
 /* Service worker: casca do app em cache (funciona offline), notícias sempre da rede quando possível. */
-const VERSAO = 'fpb-v2';
+const VERSAO = 'fpb-v1.3'; // mantenha igual a APP_VERSAO em app.js ao publicar mudanças no app
 const CASCA = ['./', './index.html', './app.css', './app.js', './manifest.webmanifest', './icons/icone.svg'];
 
 self.addEventListener('install', (e) => {
-  e.waitUntil(caches.open(VERSAO).then((c) => c.addAll(CASCA)).then(() => self.skipWaiting()));
+  // Não ativa sozinho: o app mostra "Nova versão disponível" e ativa quando a pessoa tocar em Atualizar
+  e.waitUntil(caches.open(VERSAO).then((c) => c.addAll(CASCA)));
 });
 self.addEventListener('activate', (e) => {
   e.waitUntil(caches.keys().then((ks) => Promise.all(ks.filter((k) => k !== VERSAO).map((k) => caches.delete(k)))).then(() => self.clients.claim()));
+});
+self.addEventListener('message', (e) => {
+  if (e.data && e.data.tipo === 'ATIVAR') self.skipWaiting();
 });
 self.addEventListener('fetch', (e) => {
   const url = new URL(e.request.url);

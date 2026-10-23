@@ -7,7 +7,9 @@
     busca: $('#busca'), periodo: $('#periodo'), incluirGeral: $('#incluir-geral'), rotuloGeral: $('#rotulo-geral'), contagem: $('#contagem'),
     atualizado: $('#atualizado'), fontesOk: $('#fontes-ok'), btnAtualizar: $('#btn-atualizar'), btnFontes: $('#btn-fontes'),
     dlg: $('#dlg-fontes'), fecharFontes: $('#fechar-fontes'), listaFontes: $('#lista-fontes'), tpl: $('#tpl-card'),
+    puxar: $('#puxar'), puxarTexto: $('.puxar-texto'), avisoVersao: $('#aviso-versao'), btnVersao: $('#btn-versao'), toast: $('#toast'), versao: $('#versao'),
   };
+  const APP_VERSAO = '1.3';
   const PAGINA = 40;
   const estado = { regiao: 'todas', bairro: '', assunto: '', q: '', horas: 72, incluirGeral: true, pagina: 1 };
   let dados = { noticias: [], contagem: { regioes: {}, bairros: {} } };
@@ -232,7 +234,13 @@
     el.contagem.textContent = `${itens.length} ${itens.length === 1 ? 'notícia' : 'notícias'} · ${onde}${assuntoNome ? ` · ${assuntoNome}` : ''}${estado.q ? ` · “${estado.q}”` : ''}`;
     renderLista(itens);
   }
+  let toastTimer;
+  function toast(msg, ms = 2200) {
+    el.toast.textContent = msg; el.toast.hidden = false;
+    clearTimeout(toastTimer); toastTimer = setTimeout(() => { el.toast.hidden = true; }, ms);
+  }
   function renderRodape() {
+    el.versao.textContent = `app v${APP_VERSAO}`;
     if (dados.gerado_em) {
       const d = new Date(dados.gerado_em);
       el.atualizado.textContent = `Atualizado ${d.toLocaleDateString('pt-BR')} às ${d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}`;
@@ -295,20 +303,94 @@
   el.periodo.addEventListener('click', (e) => { const b = e.target.closest('button'); if (!b) return; estado.horas = Number(b.dataset.h); estado.pagina = 1; sincronizarControles(); render(); });
   el.incluirGeral.addEventListener('change', () => { estado.incluirGeral = el.incluirGeral.checked; estado.pagina = 1; render(); });
   el.mais.addEventListener('click', () => { estado.pagina++; render(); });
-  el.btnAtualizar.addEventListener('click', async () => {
+  async function atualizarTudo() {
     // Em modo servidor, pede uma coleta nova; em modo estático só recarrega o JSON.
     try { await fetch('api/coletar', { method: 'GET' }); } catch { /* estático */ }
-    carregar();
-  });
+    const antes = dados.gerado_em;
+    const total = dados.noticias.length;
+    await carregar();
+    verificarNovaVersao();
+    if (dados.gerado_em !== antes || dados.noticias.length !== total) toast(`Notícias atualizadas (${dados.noticias.length})`);
+    else toast('Você já está com a lista mais recente');
+  }
+  el.btnAtualizar.addEventListener('click', atualizarTudo);
+
+  // ---------- puxar para baixo para atualizar (celular) ----------
+  (() => {
+    const LIMIAR = 70;
+    let y0 = null; let puxando = false; let dist = 0; let ocupado = false;
+    const topoDaPagina = () => (window.scrollY || document.documentElement.scrollTop) <= 0;
+    document.addEventListener('touchstart', (e) => {
+      if (ocupado || !topoDaPagina() || e.touches.length !== 1 || el.dlg.open) { y0 = null; return; }
+      y0 = e.touches[0].clientY; puxando = false; dist = 0;
+    }, { passive: true });
+    document.addEventListener('touchmove', (e) => {
+      if (y0 === null || ocupado) return;
+      const dy = e.touches[0].clientY - y0;
+      if (dy <= 0 || !topoDaPagina()) { if (puxando) soltar(false); y0 = dy <= 0 ? y0 : null; return; }
+      puxando = true;
+      dist = Math.min(dy * 0.5, 110);
+      el.puxar.classList.add('visivel');
+      el.puxar.classList.toggle('pronto', dist >= LIMIAR);
+      el.puxarTexto.textContent = dist >= LIMIAR ? 'Solte para atualizar' : 'Puxe para atualizar';
+      el.puxar.style.transform = `translateY(${dist}px)`;
+    }, { passive: true });
+    async function soltar(disparar) {
+      const foiPronto = dist >= LIMIAR;
+      y0 = null; puxando = false;
+      if (disparar && foiPronto) {
+        ocupado = true;
+        el.puxar.classList.add('carregando'); el.puxar.classList.remove('pronto');
+        el.puxarTexto.textContent = 'Atualizando…';
+        el.puxar.style.transform = `translateY(${LIMIAR}px)`;
+        try { await atualizarTudo(); } finally {
+          el.puxar.classList.remove('carregando', 'visivel'); el.puxar.style.transform = '';
+          ocupado = false;
+        }
+        return;
+      }
+      el.puxar.classList.remove('visivel', 'pronto'); el.puxar.style.transform = ''; dist = 0;
+    }
+    document.addEventListener('touchend', () => { if (puxando) soltar(true); else y0 = null; }, { passive: true });
+    document.addEventListener('touchcancel', () => { if (puxando) soltar(false); y0 = null; }, { passive: true });
+  })();
   el.btnFontes.addEventListener('click', () => { renderFontes(); el.dlg.showModal(); });
   el.fecharFontes.addEventListener('click', () => el.dlg.close());
   el.dlg.addEventListener('click', (e) => { if (e.target === el.dlg) el.dlg.close(); });
   window.addEventListener('hashchange', () => { lerHash(); sincronizarControles(); render(); });
-  document.addEventListener('visibilitychange', () => { if (!document.hidden && dados.gerado_em && Date.now() - new Date(dados.gerado_em).getTime() > 10 * 60e3) carregar(); });
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) return;
+    verificarNovaVersao();
+    if (dados.gerado_em && Date.now() - new Date(dados.gerado_em).getTime() > 10 * 60e3) carregar();
+  });
   setInterval(() => { if (!document.hidden) carregar(); }, 15 * 60e3);
 
+  // ---------- nova versão do app ----------
+  let registro = null;
+  let recarregando = false;
+  function mostrarAvisoVersao(sw) {
+    el.avisoVersao.hidden = false;
+    el.btnVersao.onclick = () => { el.btnVersao.textContent = 'Atualizando…'; sw.postMessage({ tipo: 'ATIVAR' }); };
+  }
+  function verificarNovaVersao() {
+    if (registro) registro.update().catch(() => {});
+  }
   if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
-    navigator.serviceWorker.register('sw.js').catch(() => {});
+    navigator.serviceWorker.register('sw.js').then((reg) => {
+      registro = reg;
+      if (reg.waiting && navigator.serviceWorker.controller) mostrarAvisoVersao(reg.waiting);
+      reg.addEventListener('updatefound', () => {
+        const novo = reg.installing;
+        if (!novo) return;
+        novo.addEventListener('statechange', () => {
+          if (novo.state === 'installed' && navigator.serviceWorker.controller) mostrarAvisoVersao(novo);
+        });
+      });
+      setInterval(verificarNovaVersao, 30 * 60e3);
+    }).catch(() => {});
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+      if (recarregando) return; recarregando = true; location.reload();
+    });
   }
   carregar().catch((e) => { el.contagem.textContent = `Não consegui carregar as notícias: ${e.message}`; });
 })();
