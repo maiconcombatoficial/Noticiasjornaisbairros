@@ -13,6 +13,7 @@ const { parseFeed } = require('./rss');
 const { classificar, resumoConfig } = require('./classificar');
 const { classificarAssuntos, listaAssuntos } = require('./assuntos');
 const { resolverUrl } = require('./gnews');
+const { avaliarPauta } = require('./pautas');
 const { abrir } = require('./db');
 const { hash, normalizarUrl, chaveTitulo, agoraIso, normalizar } = require('./util');
 
@@ -94,7 +95,7 @@ function montarFontes(db, fontesCfg, bairrosCfg) {
   return fontes;
 }
 
-function montarNoticia(item, fonte, cls, assuntos = []) {
+function montarNoticia(item, fonte, cls, assuntos = [], pauta = false) {
   const viaGnews = fonte.tipo === 'gnews' || /news\.google\./i.test(item.link);
   // Link do Google já resolvido para o portal: passa a valer como link direto (inclusive na deduplicação)
   const linkDireto = item.linkResolvido ? normalizarUrl(item.linkResolvido) : null;
@@ -126,6 +127,7 @@ function montarNoticia(item, fonte, cls, assuntos = []) {
     regioes: JSON.stringify(cls.regioes),
     bairros: JSON.stringify(cls.bairros),
     assuntos: JSON.stringify(assuntos),
+    pauta: pauta ? 1 : 0,
     geral: cls.geral ? 1 : 0,
   };
 }
@@ -160,7 +162,8 @@ async function coletarFonte(db, fonte, bairrosCfg, log, exclusoes = []) {
     db.transacao(() => {
       for (const { item, cls } of candidatos) {
         const assuntos = classificarAssuntos({ titulo: item.titulo, resumo: item.resumo, conteudo: item.conteudo });
-        const n = montarNoticia(item, fonte, cls, assuntos);
+        const { pauta } = avaliarPauta({ titulo: item.titulo, resumo: item.resumo, conteudo: item.conteudo }, cls.bairros.length > 0, cls.bairros.length > 0 || cls.regioes.length > 0);
+        const n = montarNoticia(item, fonte, cls, assuntos, pauta);
         const r = db.inserirNoticia(n);
         if (r === 'nova' || r === 'substituiu') resultado.novas++;
       }
@@ -226,7 +229,8 @@ function semearDoJson(db) {
           id: x.id, url: x.url, titulo: x.titulo, titulo_chave: chaveTitulo(x.titulo), resumo: x.resumo || '', imagem: x.imagem || '',
           fonte_id: x.fonte_id || '', fonte_nome: x.fonte || '', via_gnews: x.via_gnews ? 1 : 0, publicado_em: x.publicado_em, coletado_em: x.coletado_em || agoraIso(),
           regioes: JSON.stringify(x.regioes || []), bairros: JSON.stringify(x.bairros || []),
-          assuntos: JSON.stringify(x.assuntos && x.assuntos.length ? x.assuntos : classificarAssuntos({ titulo: x.titulo, resumo: x.resumo })), geral: x.geral ? 1 : 0,
+          assuntos: JSON.stringify(x.assuntos && x.assuntos.length ? x.assuntos : classificarAssuntos({ titulo: x.titulo, resumo: x.resumo })),
+          pauta: (x.pauta !== undefined ? x.pauta : avaliarPauta({ titulo: x.titulo, resumo: x.resumo }, (x.bairros || []).length > 0, (x.bairros || []).length > 0 || (x.regioes || []).length > 0).pauta) ? 1 : 0, geral: x.geral ? 1 : 0,
         });
         if (r !== 'duplicada') n++;
       }
@@ -246,10 +250,12 @@ function exportar(db, bairrosCfg, fontesCfg) {
     fonte: n.fonte_nome, fonte_id: n.fonte_id, via_gnews: n.via_gnews, publicado_em: n.publicado_em, coletado_em: n.coletado_em,
     regioes: n.regioes, bairros: n.bairros,
     assuntos: n.assuntos && n.assuntos.length ? n.assuntos : classificarAssuntos({ titulo: n.titulo, resumo: n.resumo }),
+    pauta: n.pauta,
     geral: n.geral,
   }));
-  const contagem = { regioes: {}, bairros: {}, assuntos: {}, geral: 0 };
+  const contagem = { regioes: {}, bairros: {}, assuntos: {}, geral: 0, pautas: 0 };
   for (const n of noticias) {
+    if (n.pauta) contagem.pautas++;
     for (const r of n.regioes) contagem.regioes[r] = (contagem.regioes[r] || 0) + 1;
     for (const b of n.bairros) contagem.bairros[b] = (contagem.bairros[b] || 0) + 1;
     for (const a of n.assuntos) contagem.assuntos[a] = (contagem.assuntos[a] || 0) + 1;

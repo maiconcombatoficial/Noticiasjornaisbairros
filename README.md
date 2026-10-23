@@ -31,6 +31,14 @@ portais (RSS) + Google Notícias (RSS de busca)  →  coletor  →  classificado
 4. **App** (`web/`): lê `web/api/noticias.json` e filtra tudo no navegador. Abas por região, chips por bairro com contagem,
    busca, período (24 h / 3 d / 7 d / tudo), agrupamento por dia, modo escuro, funciona offline (service worker).
 
+### Pautas da comunidade
+
+O botão **📣 Pautas da comunidade** filtra as matérias em que moradores reclamam, cobram ou pedem providências,
+ou que mostram um problema concreto de bairro (buraco, alagamento, esgoto, iluminação, ônibus, creche, posto de
+saúde, obra parada…). Combina com região, bairro e assunto: dá para ver o que cada comunidade está pedindo.
+As regras e palavras ficam em `src/pautas.json` (`src/pautas.js` faz a pontuação). Notícias eleitorais, de política
+nacional, esporte e entretenimento ficam de fora de propósito.
+
 ## Rodando localmente
 
 ```bash
@@ -73,7 +81,7 @@ Nesse modo o botão "atualizar" do app dispara uma coleta na hora.
   onde pode ser restaurada arrastando para a direita. A lista fica salva só no aparelho.
 - **Notícias**: puxe a lista para baixo (ou toque no ícone de atualizar). O rodapé mostra a hora da última coleta.
 - **O app em si**: quando uma versão nova é publicada, aparece a faixa "Nova versão do app disponível" com o botão
-  **Atualizar agora**. O número da versão fica no rodapé (`app v1.7`). Ao mudar o app, altere `APP_VERSAO` em
+  **Atualizar agora**. O número da versão fica no rodapé (`app v1.8`). Ao mudar o app, altere `APP_VERSAO` em
   `web/app.js` e `VERSAO` em `web/sw.js` para o mesmo valor.
 
 ## Personalizando

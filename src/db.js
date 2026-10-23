@@ -19,6 +19,7 @@ CREATE TABLE IF NOT EXISTS noticias (
   regioes TEXT NOT NULL DEFAULT '[]',
   bairros TEXT NOT NULL DEFAULT '[]',
   assuntos TEXT NOT NULL DEFAULT '[]',
+  pauta INTEGER DEFAULT 0,
   geral INTEGER DEFAULT 0
 );
 CREATE INDEX IF NOT EXISTS idx_noticias_pub ON noticias(publicado_em);
@@ -47,12 +48,13 @@ function abrir(caminho) {
   // Migração: bancos criados antes da coluna 'assuntos'
   const colunas = db.prepare('PRAGMA table_info(noticias)').all().map((c) => c.name);
   if (!colunas.includes('assuntos')) db.exec("ALTER TABLE noticias ADD COLUMN assuntos TEXT NOT NULL DEFAULT '[]'");
+  if (!colunas.includes('pauta')) db.exec('ALTER TABLE noticias ADD COLUMN pauta INTEGER DEFAULT 0');
 
   const st = {
     porId: db.prepare('SELECT id, via_gnews FROM noticias WHERE id = ?'),
     porTitulo: db.prepare('SELECT id, via_gnews, fonte_id FROM noticias WHERE titulo_chave = ? LIMIT 1'),
-    inserir: db.prepare(`INSERT INTO noticias (id,url,titulo,titulo_chave,resumo,imagem,fonte_id,fonte_nome,via_gnews,publicado_em,coletado_em,regioes,bairros,assuntos,geral)
-      VALUES (@id,@url,@titulo,@titulo_chave,@resumo,@imagem,@fonte_id,@fonte_nome,@via_gnews,@publicado_em,@coletado_em,@regioes,@bairros,@assuntos,@geral)`),
+    inserir: db.prepare(`INSERT INTO noticias (id,url,titulo,titulo_chave,resumo,imagem,fonte_id,fonte_nome,via_gnews,publicado_em,coletado_em,regioes,bairros,assuntos,pauta,geral)
+      VALUES (@id,@url,@titulo,@titulo_chave,@resumo,@imagem,@fonte_id,@fonte_nome,@via_gnews,@publicado_em,@coletado_em,@regioes,@bairros,@assuntos,@pauta,@geral)`),
     apagar: db.prepare('DELETE FROM noticias WHERE id = ?'),
     recentes: db.prepare('SELECT * FROM noticias WHERE publicado_em >= ? ORDER BY publicado_em DESC LIMIT ?'),
     limpar: db.prepare('DELETE FROM noticias WHERE publicado_em < ?'),
@@ -154,6 +156,7 @@ function desserializar(linha) {
     regioes: JSON.parse(linha.regioes || '[]'),
     bairros: JSON.parse(linha.bairros || '[]'),
     assuntos: JSON.parse(linha.assuntos || '[]'),
+    pauta: !!linha.pauta,
     geral: !!linha.geral,
     via_gnews: !!linha.via_gnews,
   };

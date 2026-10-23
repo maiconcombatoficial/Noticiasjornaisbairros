@@ -9,11 +9,11 @@
     atualizado: $('#atualizado'), fontesOk: $('#fontes-ok'), btnAtualizar: $('#btn-atualizar'), btnFontes: $('#btn-fontes'),
     dlg: $('#dlg-fontes'), fecharFontes: $('#fechar-fontes'), listaFontes: $('#lista-fontes'), tpl: $('#tpl-card'),
     puxar: $('#puxar'), puxarTexto: $('.puxar-texto'), avisoVersao: $('#aviso-versao'), btnVersao: $('#btn-versao'), toast: $('#toast'), versao: $('#versao'),
-    toastTexto: $('#toast-texto'), toastAcao: $('#toast-acao'), btnArquivadas: $('#btn-arquivadas'),
+    toastTexto: $('#toast-texto'), toastAcao: $('#toast-acao'), btnArquivadas: $('#btn-arquivadas'), btnPautas: $('#btn-pautas'),
   };
-  const APP_VERSAO = '1.7';
+  const APP_VERSAO = '1.8';
   const PAGINA = 40;
-  const estado = { regiao: 'todas', bairro: '', assunto: '', q: '', horas: 72, incluirGeral: true, pagina: 1, arquivadas: false };
+  const estado = { regiao: 'todas', bairro: '', assunto: '', q: '', horas: 72, incluirGeral: true, pagina: 1, arquivadas: false, pauta: false };
   let dados = { noticias: [], contagem: { regioes: {}, bairros: {} } };
   let cfg = { regioes: [] };
   let status = null;
@@ -90,6 +90,7 @@
     estado.q = qs.get('q') || ''; el.busca.value = estado.q;
     if (qs.has('h')) estado.horas = Number(qs.get('h'));
     estado.assunto = qs.get('a') && mapaAssunto.has(qs.get('a')) ? qs.get('a') : '';
+    estado.pauta = qs.get('p') === '1';
     if (qs.has('geral')) estado.incluirGeral = qs.get('geral') !== '0';
   }
   function gravarHash() {
@@ -98,6 +99,7 @@
     const qs = new URLSearchParams();
     if (estado.q) qs.set('q', estado.q);
     if (estado.assunto) qs.set('a', estado.assunto);
+    if (estado.pauta) qs.set('p', '1');
     if (estado.horas !== 72) qs.set('h', String(estado.horas));
     if (!estado.incluirGeral) qs.set('geral', '0');
     const s = qs.toString();
@@ -116,6 +118,7 @@
       else if (estado.regiao !== 'todas') { if (!n.regioes.includes(estado.regiao)) return false; }
       else if (!estado.incluirGeral && n.geral) return false;
       if (estado.assunto && !n.assuntos.includes(estado.assunto)) return false;
+      if (estado.pauta && !n.pauta) return false;
       if (q) {
         const alvo = norm(`${n.titulo} ${n.resumo} ${n.fonte}`);
         if (!alvo.includes(q) && !n.bairros.some((b) => termosBairro.includes(b))) return false;
@@ -127,12 +130,14 @@
     // contagens respeitando período e busca, mas não região/bairro
     const limite = estado.horas ? Date.now() - estado.horas * 3600e3 : 0;
     const q = norm(estado.q.trim());
-    const c = { regioes: {}, bairros: {}, assuntos: {}, total: 0, geral: 0, noLugar: 0 };
+    const c = { regioes: {}, bairros: {}, assuntos: {}, total: 0, geral: 0, noLugar: 0, pautas: 0 };
     for (const n of dados.noticias) {
       if (estaArquivada(n) !== estado.arquivadas) continue;
       if (limite && new Date(n.publicado_em).getTime() < limite) continue;
       if (q && !norm(`${n.titulo} ${n.resumo} ${n.fonte}`).includes(q)) continue;
       const noLugar = estado.bairro ? n.bairros.includes(estado.bairro) : estado.regiao !== 'todas' ? n.regioes.includes(estado.regiao) : (estado.incluirGeral || !n.geral);
+      if (noLugar && (!estado.assunto || n.assuntos.includes(estado.assunto)) && n.pauta) c.pautas++;
+      if (estado.pauta && !n.pauta) continue;
       if (noLugar) { c.noLugar++; for (const a of n.assuntos) c.assuntos[a] = (c.assuntos[a] || 0) + 1; }
       if (estado.assunto && !n.assuntos.includes(estado.assunto)) continue;
       c.total++;
@@ -310,6 +315,7 @@
       const s = document.createElement('span'); s.className = 'tag'; s.style.setProperty('--c', mapaRegiao.get(b.regiao)?.cor || 'var(--geral)'); s.textContent = b.nome; tags.appendChild(s);
     }
     if (!n.regioes.length && !n.bairros.length) { const s = document.createElement('span'); s.className = 'tag'; s.textContent = 'Floripa'; tags.appendChild(s); }
+    if (n.pauta) { const s = document.createElement('span'); s.className = 'tag pauta'; s.textContent = '📣 Pauta'; s.title = 'A comunidade reclama, cobra ou pede providências'; tags.appendChild(s); }
     for (const aid of n.assuntos) {
       const a = mapaAssunto.get(aid); if (!a) continue;
       const s = document.createElement('span'); s.className = 'tag assunto'; s.textContent = `${a.emoji || ''} ${a.nome}`.trim();
@@ -345,12 +351,14 @@
     renderSeletores(c);
     document.body.classList.toggle('modo-arquivadas', estado.arquivadas);
     el.btnArquivadas.classList.toggle('ativo', estado.arquivadas);
+    el.btnPautas.classList.toggle('ativo', estado.pauta);
+    $('.n', el.btnPautas).textContent = c.pautas;
     $('.n', el.btnArquivadas).textContent = dados.noticias.filter(estaArquivada).length;
     el.rotuloGeral.hidden = estado.regiao !== 'todas' || estado.arquivadas;
     const itens = filtrar();
     const onde = estado.bairro ? mapaBairro.get(estado.bairro)?.nome : estado.regiao === 'todas' ? 'Florianópolis' : mapaRegiao.get(estado.regiao)?.nome;
     const assuntoNome = estado.assunto ? mapaAssunto.get(estado.assunto)?.nome : '';
-    el.contagem.textContent = `${itens.length} ${itens.length === 1 ? 'notícia' : 'notícias'}${estado.arquivadas ? (itens.length === 1 ? ' arquivada' : ' arquivadas') : ''} · ${onde}${assuntoNome ? ` · ${assuntoNome}` : ''}${estado.q ? ` · “${estado.q}”` : ''}`;
+    el.contagem.textContent = `${itens.length} ${itens.length === 1 ? 'notícia' : 'notícias'}${estado.arquivadas ? (itens.length === 1 ? ' arquivada' : ' arquivadas') : ''} · ${onde}${estado.pauta ? ' · Pautas da comunidade' : ''}${assuntoNome ? ` · ${assuntoNome}` : ''}${estado.q ? ` · “${estado.q}”` : ''}`;
     renderLista(itens);
   }
   let toastTimer;
@@ -404,7 +412,7 @@
       mapaRegiao.clear(); mapaBairro.clear(); mapaAssunto.clear();
       for (const r of cfg.regioes || []) { mapaRegiao.set(r.id, r); for (const bb of r.bairros) mapaBairro.set(bb.id, { ...bb, regiao: r.id }); }
       for (const a of cfg.assuntos || []) mapaAssunto.set(a.id, a);
-      dados.noticias = (dados.noticias || []).map((x) => ({ ...x, regioes: x.regioes || [], bairros: x.bairros || [], assuntos: x.assuntos || [] })).sort((x, y) => (y.publicado_em || '').localeCompare(x.publicado_em || ''));
+      dados.noticias = (dados.noticias || []).map((x) => ({ ...x, regioes: x.regioes || [], bairros: x.bairros || [], assuntos: x.assuntos || [], pauta: !!x.pauta })).sort((x, y) => (y.publicado_em || '').localeCompare(x.publicado_em || ''));
       lerHash();
       sincronizarControles();
       render();
@@ -422,6 +430,7 @@
   let tmr;
   el.busca.addEventListener('input', () => { clearTimeout(tmr); tmr = setTimeout(() => { estado.q = el.busca.value; estado.pagina = 1; render(); }, 180); });
   el.periodo.addEventListener('click', (e) => { const b = e.target.closest('button'); if (!b) return; estado.horas = Number(b.dataset.h); estado.pagina = 1; sincronizarControles(); render(); });
+  el.btnPautas.addEventListener('click', () => { estado.pauta = !estado.pauta; estado.pagina = 1; render(); });
   el.btnArquivadas.addEventListener('click', () => { estado.arquivadas = !estado.arquivadas; estado.pagina = 1; render(); window.scrollTo({ top: 0 }); });
   el.incluirGeral.addEventListener('change', () => { estado.incluirGeral = el.incluirGeral.checked; estado.pagina = 1; render(); });
   el.mais.addEventListener('click', () => { estado.pagina++; render(); });
