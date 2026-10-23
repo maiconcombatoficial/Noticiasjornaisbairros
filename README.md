@@ -90,8 +90,20 @@ Nesse modo o botão "atualizar" do app dispara uma coleta na hora.
   onde pode ser restaurada arrastando para a direita. A lista fica salva só no aparelho.
 - **Notícias**: puxe a lista para baixo (ou toque no ícone de atualizar). O rodapé mostra a hora da última coleta.
 - **O app em si**: quando uma versão nova é publicada, aparece a faixa "Nova versão do app disponível" com o botão
-  **Atualizar agora**. O número da versão fica no rodapé (`app v1.13`). Ao mudar o app, altere `APP_VERSAO` em
+  **Atualizar agora**. O número da versão fica no rodapé (`app v1.14`). Ao mudar o app, altere `APP_VERSAO` em
   `web/app.js` e `VERSAO` em `web/sw.js` para o mesmo valor.
+
+## Senha de acesso (proteção simples)
+
+O app pode pedir uma senha antes de mostrar a interface. É uma proteção **só na tela**: afasta curiosos, mas os
+arquivos de dados continuam acessíveis pelo endereço direto e o código é público. Para proteção de verdade, use o
+modo servidor com login ou um serviço como o Cloudflare Access.
+
+- A senha fica em `web/api/acesso.json` como SHA-256 com sal (não em texto puro).
+- Para trocar: abra `senha.html` no próprio site (ex.: `https://<usuario>.github.io/Noticiasjornaisbairros/senha.html`),
+  gere o conteúdo e cole no arquivo pelo GitHub. Ou rode `node src/senha.js "nova senha"`.
+- Senha vazia (`"ativo": false`) desliga a tela.
+- O acesso fica lembrado no aparelho; "sair" no rodapé esquece.
 
 ## Personalizando
 

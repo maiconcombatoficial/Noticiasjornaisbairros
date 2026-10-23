@@ -15,6 +15,16 @@
 <link rel="stylesheet" href="app.css">
 </head>
 <body>
+<div id="portao" class="portao" hidden>
+  <form id="portao-form" class="portao-caixa" autocomplete="off">
+    <img src="icons/icone.svg" alt="" width="56" height="56">
+    <h1>Floripa por Bairro</h1>
+    <p>Acesso restrito. Digite a senha para entrar.</p>
+    <input id="portao-senha" type="password" placeholder="Senha" autocomplete="current-password" required>
+    <button type="submit">Entrar</button>
+    <p id="portao-erro" class="portao-erro" hidden>Senha incorreta.</p>
+  </form>
+</div>
 <div id="puxar" class="puxar" aria-hidden="true"><span><span class="puxar-icone">↓</span><span class="puxar-texto">Puxe para atualizar</span></span></div>
 <div id="aviso-versao" class="aviso-versao" hidden>
   <span>Nova versão do app disponível.</span>
@@ -73,6 +83,7 @@
   <span id="atualizado"></span>
   <span id="fontes-ok"></span>
   <span id="versao"></span>
+  <a id="sair" href="#" hidden>sair</a>
   <a href="https://github.com/maiconcombatoficial/Noticiasjornaisbairros" target="_blank" rel="noopener">código</a>
 </footer>
 

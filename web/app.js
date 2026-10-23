@@ -11,7 +11,7 @@
     puxar: $('#puxar'), puxarTexto: $('.puxar-texto'), avisoVersao: $('#aviso-versao'), btnVersao: $('#btn-versao'), toast: $('#toast'), versao: $('#versao'),
     toastTexto: $('#toast-texto'), toastAcao: $('#toast-acao'), btnArquivadas: $('#btn-arquivadas'), btnLerDepois: $('#btn-lerdepois'), btnPautas: $('#btn-pautas'), btnAgenda: $('#btn-agenda'),
   };
-  const APP_VERSAO = '1.13';
+  const APP_VERSAO = '1.14';
   const PAGINA = 40;
   const estado = { regiao: 'todas', bairro: '', assunto: '', q: '', horas: 72, incluirGeral: true, pagina: 1, visao: 'normal', pauta: false, agenda: false };
   let dados = { noticias: [], contagem: { regioes: {}, bairros: {} } };
@@ -596,5 +596,41 @@
       if (recarregando) return; recarregando = true; location.reload();
     });
   }
-  carregar().catch((e) => { el.contagem.textContent = `Não consegui carregar as notícias: ${e.message}`; });
+  // ---------- tela de senha (proteção simples, só na interface) ----------
+  const CHAVE_ACESSO = 'fpb-acesso';
+  async function sha256(texto) {
+    const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(texto));
+    return [...new Uint8Array(buf)].map((b) => b.toString(16).padStart(2, '0')).join('');
+  }
+  async function verificarAcesso() {
+    let acesso = null;
+    try { acesso = await carregarJson('api/acesso.json'); } catch { return true; }
+    if (!acesso || !acesso.ativo || !acesso.hash) return true;
+    let lembrado = '';
+    try { lembrado = localStorage.getItem(CHAVE_ACESSO) || ''; } catch { /* sem armazenamento */ }
+    if (lembrado === acesso.hash) { mostrarSair(); return true; }
+    if (!window.isSecureContext || !crypto.subtle) { alert('A tela de senha precisa de HTTPS.'); return true; }
+    return new Promise((resolver) => {
+      const portao = $('#portao'); const form = $('#portao-form'); const campo = $('#portao-senha'); const erro = $('#portao-erro');
+      document.body.classList.add('bloqueado'); portao.hidden = false; setTimeout(() => campo.focus(), 50);
+      let tentativas = 0;
+      form.onsubmit = async (e) => {
+        e.preventDefault();
+        const hash = await sha256(acesso.sal + campo.value.normalize('NFC'));
+        if (hash === acesso.hash) {
+          try { localStorage.setItem(CHAVE_ACESSO, hash); } catch { /* sem armazenamento */ }
+          portao.hidden = true; document.body.classList.remove('bloqueado'); mostrarSair(); resolver(true);
+        } else {
+          tentativas++; erro.hidden = false; campo.value = ''; campo.disabled = true;
+          form.classList.add('tremer'); setTimeout(() => form.classList.remove('tremer'), 350);
+          setTimeout(() => { campo.disabled = false; campo.focus(); }, Math.min(1000 * tentativas, 8000));
+        }
+      };
+    });
+  }
+  function mostrarSair() {
+    const sair = $('#sair'); sair.hidden = false;
+    sair.onclick = (e) => { e.preventDefault(); try { localStorage.removeItem(CHAVE_ACESSO); } catch { /* */ } location.reload(); };
+  }
+  verificarAcesso().then(() => carregar()).catch((e) => { el.contagem.textContent = `Não consegui carregar as notícias: ${e.message}`; });
 })();
