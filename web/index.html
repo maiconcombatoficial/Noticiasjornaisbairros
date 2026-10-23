@@ -40,8 +40,10 @@
     <input id="busca" type="search" placeholder="Buscar notícia, bairro, rua, assunto…" autocomplete="off" enterkeyhint="search">
   </div>
   <nav class="regioes" id="regioes" aria-label="Regiões"></nav>
-  <div class="bairros" id="bairros" aria-label="Bairros"></div>
-  <div class="assuntos" id="assuntos" aria-label="Assuntos"></div>
+  <div class="seletores">
+    <button class="seletor" id="sel-bairro" aria-haspopup="dialog"><span class="seletor-rotulo">Bairro</span><span class="seletor-valor">Todos</span><span class="seta">▾</span></button>
+    <button class="seletor" id="sel-assunto" aria-haspopup="dialog"><span class="seletor-rotulo">Assunto</span><span class="seletor-valor">Todos</span><span class="seta">▾</span></button>
+  </div>
 </header>
 
 <main class="conteudo">
@@ -71,6 +73,15 @@
 </footer>
 
 <div id="toast" class="toast" hidden></div>
+<dialog id="dlg-escolha" class="folha">
+  <div class="folha-alca"></div>
+  <div class="folha-cabecalho">
+    <h2 id="escolha-titulo">Bairro</h2>
+    <button class="btn-icone" id="fechar-escolha" aria-label="Fechar">✕</button>
+  </div>
+  <input id="escolha-busca" type="search" placeholder="Filtrar…" autocomplete="off">
+  <div id="escolha-lista" class="folha-lista"></div>
+</dialog>
 <dialog id="dlg-fontes" class="painel">
   <div class="painel-cabecalho">
     <h2>Fontes</h2>
