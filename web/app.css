@@ -82,12 +82,10 @@ button { font: inherit; color: inherit; cursor: pointer; }
 .card { display: flex; flex-direction: column; position: relative; touch-action: pan-y; }
 .card-movel { display: flex; flex-direction: column; flex: 1; background: var(--superficie); border-radius: var(--raio); position: relative; z-index: 1; will-change: transform; }
 .card-movel.animando { transition: transform .25s ease, opacity .25s ease; }
-.card-fundo { position: absolute; inset: 0; border-radius: var(--raio); display: flex; align-items: center; justify-content: space-between; padding: 0 22px; font-weight: 700; color: #fff; background: #ef4444; }
-.card-fundo .fundo-arquivar { margin-left: auto; }
-.card-fundo .fundo-restaurar { margin-right: auto; display: none; }
-.modo-arquivadas .card-fundo { background: var(--sul); flex-direction: row-reverse; }
-.modo-arquivadas .card-fundo .fundo-arquivar { display: none; }
-.modo-arquivadas .card-fundo .fundo-restaurar { display: inline; }
+.card-fundo { position: absolute; inset: 0; border-radius: var(--raio); display: flex; align-items: center; justify-content: flex-end; padding: 0 22px; font-weight: 700; color: #fff; background: var(--superficie-2); }
+.card-acoes { flex-wrap: wrap; }
+.acao.salvo { border-color: var(--primaria); color: var(--primaria); }
+.tag.salvo { background: color-mix(in srgb, var(--primaria) 18%, transparent); color: var(--primaria); }
 .btn-pautas { border: 1px solid var(--borda); background: var(--superficie); border-radius: 999px; padding: 6px 12px; font-size: .85rem; color: var(--texto); font-weight: 600; }
 .btn-pautas .n { color: var(--texto-2); }
 .btn-pautas.ativo { background: var(--centro); border-color: var(--centro); color: #1a1200; }
@@ -98,7 +96,7 @@ button { font: inherit; color: inherit; cursor: pointer; }
 .btn-arquivadas .n { opacity: .8; }
 .btn-arquivadas.ativo { background: var(--texto); color: var(--fundo); border-color: var(--texto); }
 .toast { display: flex; align-items: center; gap: 12px; }
-.toast button { border: 0; background: transparent; color: var(--primaria); font-weight: 700; padding: 0; }
+.toast button { border: 0; background: transparent; color: var(--primaria); font-weight: 700; padding: 0; white-space: nowrap; }
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .toast button { color: #8fb3ff; } }
 .card-link { display: flex; flex-direction: column; flex: 1; }
 .card-acoes { display: flex; gap: 6px; padding: 0 10px 10px; }

@@ -9,11 +9,11 @@
     atualizado: $('#atualizado'), fontesOk: $('#fontes-ok'), btnAtualizar: $('#btn-atualizar'), btnFontes: $('#btn-fontes'),
     dlg: $('#dlg-fontes'), fecharFontes: $('#fechar-fontes'), listaFontes: $('#lista-fontes'), tpl: $('#tpl-card'),
     puxar: $('#puxar'), puxarTexto: $('.puxar-texto'), avisoVersao: $('#aviso-versao'), btnVersao: $('#btn-versao'), toast: $('#toast'), versao: $('#versao'),
-    toastTexto: $('#toast-texto'), toastAcao: $('#toast-acao'), btnArquivadas: $('#btn-arquivadas'), btnPautas: $('#btn-pautas'),
+    toastTexto: $('#toast-texto'), toastAcao: $('#toast-acao'), btnArquivadas: $('#btn-arquivadas'), btnLerDepois: $('#btn-lerdepois'), btnPautas: $('#btn-pautas'),
   };
-  const APP_VERSAO = '1.8';
+  const APP_VERSAO = '1.9';
   const PAGINA = 40;
-  const estado = { regiao: 'todas', bairro: '', assunto: '', q: '', horas: 72, incluirGeral: true, pagina: 1, arquivadas: false, pauta: false };
+  const estado = { regiao: 'todas', bairro: '', assunto: '', q: '', horas: 72, incluirGeral: true, pagina: 1, visao: 'normal', pauta: false };
   let dados = { noticias: [], contagem: { regioes: {}, bairros: {} } };
   let cfg = { regioes: [] };
   let status = null;
@@ -53,31 +53,24 @@
     return frag;
   }
 
-  // ---------- arquivo de notícias (fica só neste aparelho) ----------
-  const CHAVE_ARQUIVO = 'fpb-arquivadas';
+  // ---------- listas locais: arquivadas e ler depois (ficam só neste aparelho) ----------
   const chaveTitulo = (t) => norm(t).replace(/[^a-z0-9]+/g, ' ').trim().split(' ').filter(Boolean).slice(0, 14).join(' ');
-  const arquivo = { porId: new Map(), porTitulo: new Map() };
-  function carregarArquivo() {
+  function listaLocal(chave) {
+    const porId = new Map(); const porTitulo = new Map();
     try {
-      const lista = JSON.parse(localStorage.getItem(CHAVE_ARQUIVO) || '[]');
       const limite = Date.now() - 45 * 86400e3;
-      for (const x of lista) { if (x.q > limite) { arquivo.porId.set(x.id, x); if (x.t) arquivo.porTitulo.set(x.t, x); } }
+      for (const x of JSON.parse(localStorage.getItem(chave) || '[]')) { if (x.q > limite) { porId.set(x.id, x); if (x.t) porTitulo.set(x.t, x); } }
     } catch { /* sem armazenamento */ }
+    const salvar = () => { try { localStorage.setItem(chave, JSON.stringify([...porId.values()])); } catch { /* sem armazenamento */ } };
+    return {
+      tem: (n) => porId.has(n.id) || porTitulo.has(chaveTitulo(n.titulo)),
+      adicionar(n) { const x = { id: n.id, t: chaveTitulo(n.titulo), q: Date.now() }; porId.set(x.id, x); porTitulo.set(x.t, x); salvar(); },
+      remover(n) { const t = chaveTitulo(n.titulo); for (const [k, x] of porId) if (x.id === n.id || x.t === t) porId.delete(k); porTitulo.delete(t); salvar(); },
+    };
   }
-  function salvarArquivo() {
-    try { localStorage.setItem(CHAVE_ARQUIVO, JSON.stringify([...arquivo.porId.values()])); } catch { /* sem armazenamento */ }
-  }
-  const estaArquivada = (n) => arquivo.porId.has(n.id) || arquivo.porTitulo.has(chaveTitulo(n.titulo));
-  function arquivar(n) {
-    const x = { id: n.id, t: chaveTitulo(n.titulo), q: Date.now() };
-    arquivo.porId.set(x.id, x); arquivo.porTitulo.set(x.t, x); salvarArquivo();
-  }
-  function restaurar(n) {
-    const t = chaveTitulo(n.titulo);
-    for (const [k, x] of arquivo.porId) if (x.id === n.id || x.t === t) arquivo.porId.delete(k);
-    arquivo.porTitulo.delete(t); salvarArquivo();
-  }
-  carregarArquivo();
+  const arquivadas = listaLocal('fpb-arquivadas');
+  const lerDepois = listaLocal('fpb-ler-depois');
+  const estaArquivada = (n) => arquivadas.tem(n);
 
   // ---------- estado na URL (#/regiao/bairro?q=) ----------
   function lerHash() {
@@ -107,12 +100,17 @@
   }
 
   // ---------- filtragem ----------
+  function naVisao(n) {
+    if (estado.visao === 'arquivadas') return estaArquivada(n);
+    if (estado.visao === 'lerdepois') return lerDepois.tem(n) && !estaArquivada(n);
+    return !estaArquivada(n);
+  }
   function filtrar() {
     const limite = estado.horas ? Date.now() - estado.horas * 3600e3 : 0;
     const q = norm(estado.q.trim());
     const termosBairro = q ? [...mapaBairro.values()].filter((b) => norm(b.nome).includes(q)).map((b) => b.id) : [];
     return dados.noticias.filter((n) => {
-      if (estaArquivada(n) !== estado.arquivadas) return false;
+      if (!naVisao(n)) return false;
       if (limite && new Date(n.publicado_em).getTime() < limite) return false;
       if (estado.bairro) { if (!n.bairros.includes(estado.bairro)) return false; }
       else if (estado.regiao !== 'todas') { if (!n.regioes.includes(estado.regiao)) return false; }
@@ -132,7 +130,7 @@
     const q = norm(estado.q.trim());
     const c = { regioes: {}, bairros: {}, assuntos: {}, total: 0, geral: 0, noLugar: 0, pautas: 0 };
     for (const n of dados.noticias) {
-      if (estaArquivada(n) !== estado.arquivadas) continue;
+      if (!naVisao(n)) continue;
       if (limite && new Date(n.publicado_em).getTime() < limite) continue;
       if (q && !norm(`${n.titulo} ${n.resumo} ${n.fonte}`).includes(q)) continue;
       const noLugar = estado.bairro ? n.bairros.includes(estado.bairro) : estado.regiao !== 'todas' ? n.regioes.includes(estado.regiao) : (estado.incluirGeral || !n.geral);
@@ -256,34 +254,48 @@
     };
     const artigo = $('.card', frag);
     const movel = $('.card-movel', frag);
+    const fundo = $('.card-fundo', frag);
     const btArquivar = $('.arquivar', frag);
-    $('span', btArquivar).textContent = estado.arquivadas ? 'Restaurar' : 'Arquivar';
-    function concluir() {
+    const btLerDepois = $('.lerdepois', frag);
+    const salvo = lerDepois.tem(n);
+    // O que cada lado do arrasto faz depende da lista que está aberta
+    const acaoArquivar = { rotulo: 'Arquivar', cor: '#ef4444', executar: () => { arquivadas.adicionar(n); toast('Notícia arquivada', 4000, { rotulo: 'Desfazer', ao: () => { arquivadas.remover(n); render(); } }); } };
+    const acaoRestaurar = { rotulo: 'Restaurar', cor: '#10b981', executar: () => { arquivadas.remover(n); toast('Notícia restaurada'); } };
+    const acaoSalvar = { rotulo: 'Ler depois', cor: '#0b5fff', executar: () => { lerDepois.adicionar(n); toast('Salva em Ler depois', 2500, { rotulo: 'Ver lista', ao: () => { estado.visao = 'lerdepois'; estado.pagina = 1; render(); window.scrollTo({ top: 0 }); } }); }, semSumir: true };
+    const acaoRemover = { rotulo: 'Remover', cor: '#64748b', executar: () => { lerDepois.remover(n); toast('Removida de Ler depois', 4000, { rotulo: 'Desfazer', ao: () => { lerDepois.adicionar(n); render(); } }); } };
+    let esquerda = null, direita = null;
+    if (estado.visao === 'arquivadas') { direita = acaoRestaurar; }
+    else if (estado.visao === 'lerdepois') { esquerda = acaoArquivar; direita = acaoRemover; }
+    else { esquerda = acaoArquivar; direita = salvo ? acaoRemover : acaoSalvar; }
+    $('span', btArquivar).textContent = estado.visao === 'arquivadas' ? 'Restaurar' : 'Arquivar';
+    $('span', btLerDepois).textContent = salvo ? 'Salvo' : 'Ler depois';
+    btLerDepois.classList.toggle('salvo', salvo);
+    function executar(acao, direcao) {
+      if (acao.semSumir) { movel.classList.add('animando'); movel.style.transform = ''; acao.executar(); setTimeout(render, 150); return; }
       movel.classList.add('animando');
-      movel.style.transform = `translateX(${estado.arquivadas ? '110%' : '-110%'})`; movel.style.opacity = '0';
-      setTimeout(() => {
-        if (estado.arquivadas) { restaurar(n); toast('Notícia restaurada'); }
-        else { arquivar(n); toast('Notícia arquivada', 4000, { rotulo: 'Desfazer', ao: () => { restaurar(n); render(); } }); }
-        render();
-      }, 230);
+      movel.style.transform = `translateX(${direcao > 0 ? '110%' : '-110%'})`; movel.style.opacity = '0';
+      setTimeout(() => { acao.executar(); render(); }, 230);
     }
-    btArquivar.onclick = (e) => { e.preventDefault(); e.stopPropagation(); concluir(); };
-    // arrastar para o lado (celular)
+    btArquivar.onclick = (e) => { e.preventDefault(); e.stopPropagation(); executar(estado.visao === 'arquivadas' ? acaoRestaurar : acaoArquivar, estado.visao === 'arquivadas' ? 1 : -1); };
+    btLerDepois.onclick = (e) => { e.preventDefault(); e.stopPropagation(); executar(salvo ? acaoRemover : acaoSalvar, 1); };
+    // arrastar para os lados (celular)
     let x0 = null, y0 = null, dx = 0, modo = null;
-    const sentido = estado.arquivadas ? 1 : -1;
     artigo.addEventListener('touchstart', (e) => { if (e.touches.length !== 1) return; x0 = e.touches[0].clientX; y0 = e.touches[0].clientY; dx = 0; modo = null; movel.classList.remove('animando'); }, { passive: true });
     artigo.addEventListener('touchmove', (e) => {
       if (x0 === null) return;
       const mx = e.touches[0].clientX - x0, my = e.touches[0].clientY - y0;
       if (!modo) { if (Math.abs(mx) < 8 && Math.abs(my) < 8) return; modo = Math.abs(mx) > Math.abs(my) * 1.3 ? 'h' : 'v'; }
       if (modo !== 'h') return;
-      dx = mx * sentido > 0 ? mx : mx * 0.15; // só anda de verdade no sentido certo
+      const acao = mx < 0 ? esquerda : direita;
+      dx = acao ? mx : mx * 0.15; // sem ação daquele lado, quase não anda
+      if (acao) { fundo.textContent = acao.rotulo; fundo.style.background = acao.cor; fundo.style.justifyContent = mx < 0 ? 'flex-end' : 'flex-start'; }
       movel.style.transform = `translateX(${dx}px)`;
     }, { passive: true });
     const soltar = () => {
       if (x0 === null) return;
       const limiar = Math.min(120, artigo.offsetWidth * 0.35);
-      if (modo === 'h' && dx * sentido >= limiar) concluir();
+      const acao = dx < 0 ? esquerda : direita;
+      if (modo === 'h' && acao && Math.abs(dx) >= limiar) executar(acao, dx < 0 ? -1 : 1);
       else { movel.classList.add('animando'); movel.style.transform = ''; }
       x0 = y0 = null; modo = null;
     };
@@ -304,6 +316,7 @@
     $('.titulo', frag).appendChild(destacar(n.titulo, estado.q.trim()));
     if (n.resumo && norm(n.resumo) !== norm(n.titulo)) $('.resumo', frag).appendChild(destacar(n.resumo, estado.q.trim()));
     const tags = $('.tags', frag);
+    if (salvo && estado.visao === 'normal') { const s = document.createElement('span'); s.className = 'tag salvo'; s.textContent = '🔖 Ler depois'; tags.appendChild(s); }
     const regioesComBairro = new Set(n.bairros.map((b) => mapaBairro.get(b)?.regiao));
     for (const rid of n.regioes) {
       if (regioesComBairro.has(rid)) continue;
@@ -337,8 +350,10 @@
     el.vazio.hidden = itens.length > 0;
     el.mais.hidden = mostrar.length >= itens.length;
     if (!itens.length) {
-      el.vazioDica.textContent = estado.arquivadas
+      el.vazioDica.textContent = estado.visao === 'arquivadas'
         ? 'Arraste uma notícia para a esquerda (ou toque em Arquivar) para guardá-la aqui.'
+        : estado.visao === 'lerdepois'
+        ? 'Arraste uma notícia para a direita (ou toque em Ler depois) para guardá-la aqui.'
         : dados.noticias.length
         ? 'Tente outro período, outro bairro ou veja as notícias gerais de Floripa.'
         : 'A primeira coleta ainda não rodou. Em modo servidor ela começa sozinha; no GitHub Pages, aguarde a ação agendada.';
@@ -349,16 +364,17 @@
     const c = contar();
     renderRegioes(c);
     renderSeletores(c);
-    document.body.classList.toggle('modo-arquivadas', estado.arquivadas);
-    el.btnArquivadas.classList.toggle('ativo', estado.arquivadas);
+    el.btnArquivadas.classList.toggle('ativo', estado.visao === 'arquivadas');
+    $('.n', el.btnArquivadas).textContent = dados.noticias.filter(estaArquivada).length;
+    el.btnLerDepois.classList.toggle('ativo', estado.visao === 'lerdepois');
+    $('.n', el.btnLerDepois).textContent = dados.noticias.filter((n) => lerDepois.tem(n) && !estaArquivada(n)).length;
     el.btnPautas.classList.toggle('ativo', estado.pauta);
     $('.n', el.btnPautas).textContent = c.pautas;
-    $('.n', el.btnArquivadas).textContent = dados.noticias.filter(estaArquivada).length;
-    el.rotuloGeral.hidden = estado.regiao !== 'todas' || estado.arquivadas;
+    el.rotuloGeral.hidden = estado.regiao !== 'todas' || estado.visao !== 'normal';
     const itens = filtrar();
     const onde = estado.bairro ? mapaBairro.get(estado.bairro)?.nome : estado.regiao === 'todas' ? 'Florianópolis' : mapaRegiao.get(estado.regiao)?.nome;
     const assuntoNome = estado.assunto ? mapaAssunto.get(estado.assunto)?.nome : '';
-    el.contagem.textContent = `${itens.length} ${itens.length === 1 ? 'notícia' : 'notícias'}${estado.arquivadas ? (itens.length === 1 ? ' arquivada' : ' arquivadas') : ''} · ${onde}${estado.pauta ? ' · Pautas da comunidade' : ''}${assuntoNome ? ` · ${assuntoNome}` : ''}${estado.q ? ` · “${estado.q}”` : ''}`;
+    el.contagem.textContent = `${itens.length} ${itens.length === 1 ? 'notícia' : 'notícias'}${estado.visao === 'arquivadas' ? (itens.length === 1 ? ' arquivada' : ' arquivadas') : estado.visao === 'lerdepois' ? ' para ler depois' : ''} · ${onde}${estado.pauta ? ' · Pautas da comunidade' : ''}${assuntoNome ? ` · ${assuntoNome}` : ''}${estado.q ? ` · “${estado.q}”` : ''}`;
     renderLista(itens);
   }
   let toastTimer;
@@ -431,7 +447,8 @@
   el.busca.addEventListener('input', () => { clearTimeout(tmr); tmr = setTimeout(() => { estado.q = el.busca.value; estado.pagina = 1; render(); }, 180); });
   el.periodo.addEventListener('click', (e) => { const b = e.target.closest('button'); if (!b) return; estado.horas = Number(b.dataset.h); estado.pagina = 1; sincronizarControles(); render(); });
   el.btnPautas.addEventListener('click', () => { estado.pauta = !estado.pauta; estado.pagina = 1; render(); });
-  el.btnArquivadas.addEventListener('click', () => { estado.arquivadas = !estado.arquivadas; estado.pagina = 1; render(); window.scrollTo({ top: 0 }); });
+  el.btnArquivadas.addEventListener('click', () => { estado.visao = estado.visao === 'arquivadas' ? 'normal' : 'arquivadas'; estado.pagina = 1; render(); window.scrollTo({ top: 0 }); });
+  el.btnLerDepois.addEventListener('click', () => { estado.visao = estado.visao === 'lerdepois' ? 'normal' : 'lerdepois'; estado.pagina = 1; render(); window.scrollTo({ top: 0 }); });
   el.incluirGeral.addEventListener('change', () => { estado.incluirGeral = el.incluirGeral.checked; estado.pagina = 1; render(); });
   el.mais.addEventListener('click', () => { estado.pagina++; render(); });
   async function atualizarTudo() {
