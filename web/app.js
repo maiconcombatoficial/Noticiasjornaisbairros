@@ -3,18 +3,19 @@
   'use strict';
   const $ = (s, el = document) => el.querySelector(s);
   const el = {
-    regioes: $('#regioes'), bairros: $('#bairros'), lista: $('#lista'), vazio: $('#vazio'), vazioDica: $('#vazio-dica'), mais: $('#mais'),
+    regioes: $('#regioes'), bairros: $('#bairros'), assuntos: $('#assuntos'), lista: $('#lista'), vazio: $('#vazio'), vazioDica: $('#vazio-dica'), mais: $('#mais'),
     busca: $('#busca'), periodo: $('#periodo'), incluirGeral: $('#incluir-geral'), rotuloGeral: $('#rotulo-geral'), contagem: $('#contagem'),
     atualizado: $('#atualizado'), fontesOk: $('#fontes-ok'), btnAtualizar: $('#btn-atualizar'), btnFontes: $('#btn-fontes'),
     dlg: $('#dlg-fontes'), fecharFontes: $('#fechar-fontes'), listaFontes: $('#lista-fontes'), tpl: $('#tpl-card'),
   };
   const PAGINA = 40;
-  const estado = { regiao: 'todas', bairro: '', q: '', horas: 72, incluirGeral: true, pagina: 1 };
+  const estado = { regiao: 'todas', bairro: '', assunto: '', q: '', horas: 72, incluirGeral: true, pagina: 1 };
   let dados = { noticias: [], contagem: { regioes: {}, bairros: {} } };
   let cfg = { regioes: [] };
   let status = null;
   const mapaRegiao = new Map();
   const mapaBairro = new Map();
+  const mapaAssunto = new Map();
 
   // ---------- utilidades ----------
   const norm = (s) => (s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
@@ -58,6 +59,7 @@
     const qs = new URLSearchParams(query || '');
     estado.q = qs.get('q') || ''; el.busca.value = estado.q;
     if (qs.has('h')) estado.horas = Number(qs.get('h'));
+    estado.assunto = qs.get('a') && mapaAssunto.has(qs.get('a')) ? qs.get('a') : '';
     if (qs.has('geral')) estado.incluirGeral = qs.get('geral') !== '0';
   }
   function gravarHash() {
@@ -65,6 +67,7 @@
     if (estado.bairro) h += `/${estado.bairro}`;
     const qs = new URLSearchParams();
     if (estado.q) qs.set('q', estado.q);
+    if (estado.assunto) qs.set('a', estado.assunto);
     if (estado.horas !== 72) qs.set('h', String(estado.horas));
     if (!estado.incluirGeral) qs.set('geral', '0');
     const s = qs.toString();
@@ -81,6 +84,7 @@
       if (estado.bairro) { if (!n.bairros.includes(estado.bairro)) return false; }
       else if (estado.regiao !== 'todas') { if (!n.regioes.includes(estado.regiao)) return false; }
       else if (!estado.incluirGeral && n.geral) return false;
+      if (estado.assunto && !n.assuntos.includes(estado.assunto)) return false;
       if (q) {
         const alvo = norm(`${n.titulo} ${n.resumo} ${n.fonte}`);
         if (!alvo.includes(q) && !n.bairros.some((b) => termosBairro.includes(b))) return false;
@@ -92,10 +96,13 @@
     // contagens respeitando período e busca, mas não região/bairro
     const limite = estado.horas ? Date.now() - estado.horas * 3600e3 : 0;
     const q = norm(estado.q.trim());
-    const c = { regioes: {}, bairros: {}, total: 0, geral: 0 };
+    const c = { regioes: {}, bairros: {}, assuntos: {}, total: 0, geral: 0 };
     for (const n of dados.noticias) {
       if (limite && new Date(n.publicado_em).getTime() < limite) continue;
       if (q && !norm(`${n.titulo} ${n.resumo} ${n.fonte}`).includes(q)) continue;
+      const noLugar = estado.bairro ? n.bairros.includes(estado.bairro) : estado.regiao !== 'todas' ? n.regioes.includes(estado.regiao) : (estado.incluirGeral || !n.geral);
+      if (noLugar) for (const a of n.assuntos) c.assuntos[a] = (c.assuntos[a] || 0) + 1;
+      if (estado.assunto && !n.assuntos.includes(estado.assunto)) continue;
       c.total++;
       if (n.geral) c.geral++;
       for (const r of n.regioes) c.regioes[r] = (c.regioes[r] || 0) + 1;
@@ -145,6 +152,26 @@
     }
     el.bairros.querySelector('.ativo')?.scrollIntoView({ inline: 'center', block: 'nearest' });
   }
+  function renderAssuntos(c) {
+    el.assuntos.innerHTML = '';
+    if (!mapaAssunto.size) return;
+    const todos = document.createElement('button');
+    todos.textContent = 'Todos os assuntos';
+    todos.classList.toggle('ativo', !estado.assunto);
+    todos.onclick = () => { estado.assunto = ''; estado.pagina = 1; render(); };
+    el.assuntos.appendChild(todos);
+    const ordenados = [...mapaAssunto.values()].sort((a, b) => (c.assuntos[b.id] || 0) - (c.assuntos[a.id] || 0));
+    for (const a of ordenados) {
+      const n = c.assuntos[a.id] || 0;
+      const b = document.createElement('button');
+      b.innerHTML = `${a.emoji || ''} ${a.nome}<span class="n">${n}</span>`;
+      b.classList.toggle('ativo', estado.assunto === a.id);
+      b.classList.toggle('vazio', n === 0);
+      b.onclick = () => { estado.assunto = estado.assunto === a.id ? '' : a.id; estado.pagina = 1; render(); };
+      el.assuntos.appendChild(b);
+    }
+    el.assuntos.querySelector('.ativo')?.scrollIntoView({ inline: 'center', block: 'nearest' });
+  }
   function card(n) {
     const frag = el.tpl.content.cloneNode(true);
     const a = $('.card-link', frag); a.href = n.url;
@@ -166,6 +193,13 @@
       const s = document.createElement('span'); s.className = 'tag'; s.style.setProperty('--c', mapaRegiao.get(b.regiao)?.cor || 'var(--geral)'); s.textContent = b.nome; tags.appendChild(s);
     }
     if (!n.regioes.length && !n.bairros.length) { const s = document.createElement('span'); s.className = 'tag'; s.textContent = 'Floripa'; tags.appendChild(s); }
+    for (const aid of n.assuntos) {
+      const a = mapaAssunto.get(aid); if (!a) continue;
+      const s = document.createElement('span'); s.className = 'tag assunto'; s.textContent = `${a.emoji || ''} ${a.nome}`.trim();
+      s.title = `Ver só ${a.nome}`; s.style.cursor = 'pointer';
+      s.onclick = (e) => { e.preventDefault(); e.stopPropagation(); estado.assunto = aid; estado.pagina = 1; render(); window.scrollTo({ top: 0, behavior: 'smooth' }); };
+      tags.appendChild(s);
+    }
     return frag;
   }
   function renderLista(itens) {
@@ -190,10 +224,12 @@
     const c = contar();
     renderRegioes(c);
     renderBairros(c);
+    renderAssuntos(c);
     el.rotuloGeral.hidden = estado.regiao !== 'todas';
     const itens = filtrar();
     const onde = estado.bairro ? mapaBairro.get(estado.bairro)?.nome : estado.regiao === 'todas' ? 'Florianópolis' : mapaRegiao.get(estado.regiao)?.nome;
-    el.contagem.textContent = `${itens.length} ${itens.length === 1 ? 'notícia' : 'notícias'} · ${onde}${estado.q ? ` · “${estado.q}”` : ''}`;
+    const assuntoNome = estado.assunto ? mapaAssunto.get(estado.assunto)?.nome : '';
+    el.contagem.textContent = `${itens.length} ${itens.length === 1 ? 'notícia' : 'notícias'} · ${onde}${assuntoNome ? ` · ${assuntoNome}` : ''}${estado.q ? ` · “${estado.q}”` : ''}`;
     renderLista(itens);
   }
   function renderRodape() {
@@ -236,9 +272,10 @@
         carregarJson('api/status.json').catch(() => null),
       ]);
       cfg = b; dados = n; status = s;
-      mapaRegiao.clear(); mapaBairro.clear();
+      mapaRegiao.clear(); mapaBairro.clear(); mapaAssunto.clear();
       for (const r of cfg.regioes || []) { mapaRegiao.set(r.id, r); for (const bb of r.bairros) mapaBairro.set(bb.id, { ...bb, regiao: r.id }); }
-      dados.noticias = (dados.noticias || []).map((x) => ({ ...x, regioes: x.regioes || [], bairros: x.bairros || [] })).sort((x, y) => (y.publicado_em || '').localeCompare(x.publicado_em || ''));
+      for (const a of cfg.assuntos || []) mapaAssunto.set(a.id, a);
+      dados.noticias = (dados.noticias || []).map((x) => ({ ...x, regioes: x.regioes || [], bairros: x.bairros || [], assuntos: x.assuntos || [] })).sort((x, y) => (y.publicado_em || '').localeCompare(x.publicado_em || ''));
       lerHash();
       sincronizarControles();
       render();

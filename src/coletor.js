@@ -11,6 +11,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 const { parseFeed } = require('./rss');
 const { classificar, resumoConfig } = require('./classificar');
+const { classificarAssuntos, listaAssuntos } = require('./assuntos');
 const { abrir } = require('./db');
 const { hash, normalizarUrl, chaveTitulo, agoraIso, normalizar } = require('./util');
 
@@ -90,7 +91,7 @@ function montarFontes(db, fontesCfg, bairrosCfg) {
   return fontes;
 }
 
-function montarNoticia(item, fonte, cls) {
+function montarNoticia(item, fonte, cls, assuntos = []) {
   const viaGnews = fonte.tipo === 'gnews' || /news\.google\./i.test(item.link);
   const url = viaGnews ? item.link : normalizarUrl(item.link);
   let titulo = item.titulo;
@@ -119,6 +120,7 @@ function montarNoticia(item, fonte, cls) {
     coletado_em: agoraIso(),
     regioes: JSON.stringify(cls.regioes),
     bairros: JSON.stringify(cls.bairros),
+    assuntos: JSON.stringify(assuntos),
     geral: cls.geral ? 1 : 0,
   };
 }
@@ -142,7 +144,8 @@ async function coletarFonte(db, fonte, bairrosCfg, log, exclusoes = []) {
         if (exclusoes.some((re) => re.test(tituloNorm))) { resultado.descartadas++; continue; }
         const cls = classificar({ titulo: item.titulo, resumo: item.resumo, conteudo: item.conteudo }, fonte, bairrosCfg);
         if (!cls.floripa) { resultado.descartadas++; continue; }
-        const n = montarNoticia(item, fonte, cls);
+        const assuntos = classificarAssuntos({ titulo: item.titulo, resumo: item.resumo, conteudo: item.conteudo });
+        const n = montarNoticia(item, fonte, cls, assuntos);
         const r = db.inserirNoticia(n);
         if (r === 'nova' || r === 'substituiu') resultado.novas++;
       }
@@ -190,7 +193,8 @@ function semearDoJson(db) {
         const r = db.inserirNoticia({
           id: x.id, url: x.url, titulo: x.titulo, titulo_chave: chaveTitulo(x.titulo), resumo: x.resumo || '', imagem: x.imagem || '',
           fonte_id: x.fonte_id || '', fonte_nome: x.fonte || '', via_gnews: x.via_gnews ? 1 : 0, publicado_em: x.publicado_em, coletado_em: x.coletado_em || agoraIso(),
-          regioes: JSON.stringify(x.regioes || []), bairros: JSON.stringify(x.bairros || []), geral: x.geral ? 1 : 0,
+          regioes: JSON.stringify(x.regioes || []), bairros: JSON.stringify(x.bairros || []),
+          assuntos: JSON.stringify(x.assuntos && x.assuntos.length ? x.assuntos : classificarAssuntos({ titulo: x.titulo, resumo: x.resumo })), geral: x.geral ? 1 : 0,
         });
         if (r !== 'duplicada') n++;
       }
@@ -208,17 +212,20 @@ function exportar(db, bairrosCfg, fontesCfg) {
   const noticias = db.recentes(desde, CONFIG.exportMax).map((n) => ({
     id: n.id, url: n.url, titulo: n.titulo, resumo: n.resumo ? n.resumo.slice(0, 240) : '', imagem: n.imagem || '',
     fonte: n.fonte_nome, fonte_id: n.fonte_id, via_gnews: n.via_gnews, publicado_em: n.publicado_em, coletado_em: n.coletado_em,
-    regioes: n.regioes, bairros: n.bairros, geral: n.geral,
+    regioes: n.regioes, bairros: n.bairros,
+    assuntos: n.assuntos && n.assuntos.length ? n.assuntos : classificarAssuntos({ titulo: n.titulo, resumo: n.resumo }),
+    geral: n.geral,
   }));
-  const contagem = { regioes: {}, bairros: {}, geral: 0 };
+  const contagem = { regioes: {}, bairros: {}, assuntos: {}, geral: 0 };
   for (const n of noticias) {
     for (const r of n.regioes) contagem.regioes[r] = (contagem.regioes[r] || 0) + 1;
     for (const b of n.bairros) contagem.bairros[b] = (contagem.bairros[b] || 0) + 1;
+    for (const a of n.assuntos) contagem.assuntos[a] = (contagem.assuntos[a] || 0) + 1;
     if (n.geral) contagem.geral++;
   }
   const geradoEm = agoraIso();
   fs.writeFileSync(path.join(DIR_WEB_API, 'noticias.json'), JSON.stringify({ gerado_em: geradoEm, dias: CONFIG.exportDias, total: noticias.length, contagem, noticias }));
-  fs.writeFileSync(path.join(DIR_WEB_API, 'bairros.json'), JSON.stringify({ gerado_em: geradoEm, ...resumoConfig(bairrosCfg) }));
+  fs.writeFileSync(path.join(DIR_WEB_API, 'bairros.json'), JSON.stringify({ gerado_em: geradoEm, ...resumoConfig(bairrosCfg), assuntos: listaAssuntos() }));
   const fontesInfo = {};
   for (const f of fontesCfg.fontes) fontesInfo[f.id] = { site: f.site || '', escopo: f.escopo, tipo: f.tipo };
   fs.writeFileSync(path.join(DIR_WEB_API, 'status.json'), JSON.stringify({

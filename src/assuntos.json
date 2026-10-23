@@ -1,0 +1,83 @@
+{
+  "_comentario": "Assuntos (editorias) detectados por palavras-chave no título e no resumo. Termos sem acento e em minúsculas; palavra no título vale 2 pontos, no texto 1. A notícia recebe até 3 assuntos com pontuação >= 2. Edite à vontade.",
+  "assuntos": [
+    {
+      "id": "transito",
+      "nome": "Trânsito",
+      "emoji": "🚗",
+      "termos": ["transito", "acidente", "acidentes", "colisao", "capotamento", "capotou", "atropelamento", "atropelado", "atropelada", "engavetamento", "congestionamento", "congestionada", "engarrafamento", "rodovia", "br-101", "sc-401", "sc-403", "sc-404", "sc-405", "sc-406", "via expressa", "beira-mar", "motorista", "motociclista", "ciclista", "veiculo", "veiculos", "carro", "carros", "caminhao", "moto", "radar", "radares", "semaforo", "rotula", "rotatoria", "interdicao", "interditada", "interditado", "bloqueio", "pare e siga", "desvio", "pedagio", "estacionamento", "zona azul", "habilitacao", "detran", "lei seca", "blitz", "mobilidade", "embarque", "fluxo de veiculos", "ponte hercilio luz"]
+    },
+    {
+      "id": "transporte",
+      "nome": "Transporte público",
+      "emoji": "🚌",
+      "termos": ["onibus", "transporte coletivo", "transporte publico", "terminal", "ticen", "tilag", "tisan", "tirio", "titri", "tican", "passagem", "tarifa", "bilhete", "cartao do transporte", "linha", "linhas", "aeroporto", "voo", "voos", "balsa", "barco", "barcos", "catamara", "ciclovia", "ciclofaixa", "bicicleta", "bicicletas", "uber", "taxi", "aplicativo de transporte", "motoristas de aplicativo", "consorcio fenix", "rodoviaria"]
+    },
+    {
+      "id": "seguranca",
+      "nome": "Segurança",
+      "emoji": "🚨",
+      "termos": ["policia", "policial", "policiais", "policia militar", "policia civil", "policia federal", "prf", "preso", "presa", "presos", "prisao", "assalto", "assaltante", "roubo", "roubou", "furto", "furtada", "furtado", "homicidio", "assassinato", "assassinado", "assassinada", "morto a tiros", "baleado", "baleada", "tiroteio", "tiros", "trafico", "traficante", "drogas", "apreensao", "apreendido", "mandado", "operacao", "delegacia", "suspeito", "suspeita", "feminicidio", "estupro", "agressao", "agredida", "agredido", "violencia", "golpe", "golpista", "estelionato", "foragido", "bope", "faccao", "criminoso", "criminosos", "crime", "crimes", "arma", "armas", "facada", "esfaqueado", "esfaqueada", "sequestro", "desaparecido", "desaparecida", "corpo encontrado", "investigacao", "investiga", "inquerito", "flagrante", "cadeia", "penitenciaria", "presidio", "justica condena", "condenado", "condenada", "guarda municipal", "bombeiros", "incendio", "resgate", "afogamento", "afogado"]
+    },
+    {
+      "id": "clima",
+      "nome": "Clima",
+      "emoji": "🌧️",
+      "termos": ["chuva", "chuvas", "chuvoso", "temporal", "temporais", "tempestade", "alagamento", "alagamentos", "alagada", "alagou", "enchente", "enxurrada", "deslizamento", "vendaval", "ventania", "vento", "ventos", "rajadas", "frio", "frente fria", "calor", "onda de calor", "previsao do tempo", "temperatura", "temperaturas", "ciclone", "ressaca", "mare", "granizo", "raios", "defesa civil", "epagri", "ciram", "nevoeiro", "geada", "clima", "massa de ar", "nublado", "ensolarado", "umidade", "inmet", "alerta de chuva", "alerta de temporal", "alerta meteorologico", "alerta da defesa civil", "tempo firme", "tempo instavel"]
+    },
+    {
+      "id": "politica",
+      "nome": "Política",
+      "emoji": "🏛️",
+      "termos": ["prefeito", "prefeita", "vice-prefeito", "vereador", "vereadora", "vereadores", "camara municipal", "camara de vereadores", "eleicao", "eleicoes", "eleitoral", "candidato", "candidata", "candidatos", "segundo turno", "primeiro turno", "voto", "votos", "votacao", "urna", "urnas", "tre-sc", "tse", "partido", "pt", "pl", "psd", "mdb", "deputado", "deputada", "deputados", "senador", "senadora", "governador", "governadora", "governo do estado", "governo de santa catarina", "assembleia legislativa", "alesc", "ministro", "ministra", "ministerio", "lula", "bolsonaro", "stf", "projeto de lei", "decreto", "sessao", "plenario", "topazio", "jorginho mello", "oposicao", "militancia", "ato politico", "carreata", "campanha", "pesquisa eleitoral", "mandato", "secretario", "secretaria municipal", "gabinete", "cpi", "impeachment", "orcamento", "audiencia publica", "consulta publica"]
+    },
+    {
+      "id": "saude",
+      "nome": "Saúde",
+      "emoji": "🏥",
+      "termos": ["hospital", "hospitais", "upa", "posto de saude", "centro de saude", "unidade basica", "ubs", "sus", "vacina", "vacinas", "vacinacao", "dengue", "covid", "virus", "surto", "epidemia", "medico", "medica", "medicos", "enfermeiro", "enfermeira", "enfermagem", "ambulancia", "samu", "cirurgia", "cirurgias", "leitos", "uti", "clinica", "farmacia", "saude mental", "outubro rosa", "novembro azul", "gripe", "atendimento medico", "paciente", "pacientes", "doenca", "doencas", "tratamento", "exame", "exames", "mutirao", "hemosc", "doacao de sangue", "transplante", "cancer", "diabetes", "hipertensao", "psicologo", "psicologico", "nutricao", "amamentacao", "gestante", "gestantes", "caps", "odontologico", "dentista", "saude publica", "secretaria de saude", "unidade de saude", "saude da familia", "saude bucal", "saude da mulher", "plano de saude", "vigilancia sanitaria"]
+    },
+    {
+      "id": "educacao",
+      "nome": "Educação",
+      "emoji": "🎓",
+      "termos": ["escola", "escolas", "escolar", "educacao", "creche", "creches", "aula", "aulas", "aulao", "professor", "professora", "professores", "aluno", "aluna", "alunos", "estudante", "estudantes", "ufsc", "udesc", "ifsc", "universidade", "universidades", "faculdade", "vestibular", "enem", "matricula", "matriculas", "ensino", "campus", "pos-graduacao", "mestrado", "doutorado", "curso", "cursos", "bolsa de estudos", "bolsas", "pesquisa cientifica", "cientistas", "formatura", "merenda", "educacao infantil", "ensino medio", "ensino fundamental", "rede municipal de ensino", "secretaria de educacao", "pre-vestibular", "edital"]
+    },
+    {
+      "id": "obras",
+      "nome": "Obras e serviços",
+      "emoji": "🚧",
+      "termos": ["obra", "obras", "asfalto", "asfaltamento", "pavimentacao", "recapeamento", "revitalizacao", "construcao", "reforma", "drenagem", "saneamento", "esgoto", "rede de esgoto", "casan", "celesc", "energia", "falta de luz", "sem luz", "sem energia", "falta de agua", "sem agua", "abastecimento", "infraestrutura", "calcada", "calcadas", "iluminacao", "licitacao", "engenharia", "viaduto", "elevado", "terraplanagem", "manutencao", "conserto", "reparo", "buraco", "buracos", "coleta de lixo", "comcap", "lixo", "limpeza urbana", "capina", "poda", "internet", "telefonia", "fibra", "correios", "cartorio", "iptu", "procon", "horario de funcionamento", "agendamento", "fila", "filas", "plano diretor", "zoneamento", "loteamento", "demolicao", "regularizacao fundiaria", "habitacao", "moradia", "moradias", "conjunto habitacional", "despejo", "reintegracao de posse", "ocupacao irregular", "condominio", "predio", "edificio", "gabarito", "ipuf", "alvara", "licenciamento", "urbanismo", "urbanistico", "urbanizacao"]
+    },
+    {
+      "id": "cultura",
+      "nome": "Cultura e lazer",
+      "emoji": "🎭",
+      "termos": ["show", "shows", "festival", "festa", "festas", "teatro", "cinema", "filme", "musica", "musical", "exposicao", "museu", "feira", "feiras", "carnaval", "folianopolis", "bloco", "blocos", "samba", "pagode", "sertanejo", "rock", "boi de mamao", "artista", "artistas", "livro", "livros", "literatura", "danca", "gastronomia", "gastronomico", "restaurante", "restaurantes", "bar", "bares", "balada", "reveillon", "natal", "halloween", "pascoa", "cultura", "cultural", "lazer", "fim de semana", "final de semana", "ingressos", "palco", "banda", "orquestra", "circo", "humor", "stand-up", "fotografia", "patrimonio historico", "tombamento", "paroquia", "missa", "procissao", "romaria", "religioso", "rendeira", "renda de bilro", "tainha", "ostras", "fenaostra", "cerveja", "beer", "oktoberfest", "evento cultural", "eventos culturais", "programacao cultural"]
+    },
+    {
+      "id": "esporte",
+      "nome": "Esporte",
+      "emoji": "⚽",
+      "termos": ["futebol", "avai", "figueirense", "figueira", "jogo", "jogos", "campeonato", "atleta", "atletas", "corrida", "maratona", "meia maratona", "surf", "surfe", "surfista", "surfistas", "vela", "velejador", "regata", "volei", "voleibol", "basquete", "handebol", "esporte", "esportes", "esportivo", "esportiva", "olimpico", "olimpiadas", "estadio", "ressacada", "scarpelli", "torcida", "torcedor", "torcedores", "copa", "serie a", "serie b", "serie c", "treino", "tecnico", "triatlo", "natacao", "ciclismo", "skate", "jiu-jitsu", "mma", "lutador", "tenis", "beach tennis", "futevolei", "canoa havaiana", "remo", "stand up paddle", "kitesurf", "campeao", "campea", "medalha", "titulo", "classificacao", "rebaixamento", "acesso", "ginasio", "quadra", "arena"]
+    },
+    {
+      "id": "meio-ambiente",
+      "nome": "Meio ambiente",
+      "emoji": "🌿",
+      "termos": ["meio ambiente", "ambiental", "ambientais", "poluicao", "poluida", "balneabilidade", "impropria", "improprio para banho", "improprias", "residuos", "reciclagem", "coleta seletiva", "manguezal", "mangue", "dunas", "restinga", "preservacao", "desmatamento", "baleia", "baleias", "tartaruga", "tartarugas", "pinguim", "pinguins", "golfinho", "lobo-marinho", "animais", "fauna", "flora", "unidade de conservacao", "floram", "ibama", "oleo", "derramamento", "queimada", "queimadas", "mata atlantica", "esgoto na praia", "nascente", "arvore", "arvores", "mortandade", "peixes", "pesca", "pescadores", "bandeira azul", "sustentabilidade", "sustentavel", "clima extremo", "emissoes", "carbono", "cachorro", "cachorros", "gato", "gatos", "pets", "adocao de animais", "maus-tratos", "protecao animal"]
+    },
+    {
+      "id": "turismo",
+      "nome": "Turismo e praias",
+      "emoji": "🏖️",
+      "termos": ["turismo", "turista", "turistas", "turistico", "turistica", "temporada", "veraneio", "hotel", "hoteis", "hoteleira", "pousada", "pousadas", "airbnb", "ocupacao hoteleira", "cruzeiro", "cruzeiros", "navio", "visitantes", "praia", "praias", "trilha", "trilhas", "passeio", "passeios", "roteiro", "roteiros", "viagem", "viajantes", "argentino", "argentinos", "uruguaios", "banhistas", "guarda-vidas", "salva-vidas", "bombeiros na praia", "orla", "mirante", "fortaleza", "fortalezas", "destinos", "melhor praia", "embratur", "santur"]
+    },
+    {
+      "id": "economia",
+      "nome": "Economia e negócios",
+      "emoji": "💼",
+      "termos": ["economia", "economico", "empresa", "empresas", "empresario", "empresarios", "emprego", "empregos", "vaga", "vagas", "contratacao", "comercio", "comerciantes", "loja", "lojas", "shopping", "negocio", "negocios", "startup", "startups", "inovacao", "investimento", "investimentos", "imovel", "imoveis", "imobiliario", "imobiliaria", "aluguel", "alugueis", "metro quadrado", "preco", "precos", "inflacao", "imposto", "impostos", "cdl", "acate", "fiesc", "sebrae", "renda", "salario", "feirao", "concurso", "concurso publico", "pib", "faturamento", "lucro", "vendas", "consumidor", "consumidores", "supermercado", "combustivel", "gasolina", "diesel", "tarifa", "conta de luz", "conta de agua", "juros", "credito", "financiamento", "forbes", "empreendedor", "empreendedorismo", "franquia", "delivery", "ifood", "coworking"]
+    }
+  ]
+}
