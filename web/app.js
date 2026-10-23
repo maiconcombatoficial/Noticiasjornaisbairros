@@ -9,17 +9,18 @@
     atualizado: $('#atualizado'), fontesOk: $('#fontes-ok'), btnAtualizar: $('#btn-atualizar'), btnFontes: $('#btn-fontes'),
     dlg: $('#dlg-fontes'), fecharFontes: $('#fechar-fontes'), listaFontes: $('#lista-fontes'), tpl: $('#tpl-card'),
     puxar: $('#puxar'), puxarTexto: $('.puxar-texto'), avisoVersao: $('#aviso-versao'), btnVersao: $('#btn-versao'), toast: $('#toast'), versao: $('#versao'),
-    toastTexto: $('#toast-texto'), toastAcao: $('#toast-acao'), btnArquivadas: $('#btn-arquivadas'), btnLerDepois: $('#btn-lerdepois'), btnPautas: $('#btn-pautas'),
+    toastTexto: $('#toast-texto'), toastAcao: $('#toast-acao'), btnArquivadas: $('#btn-arquivadas'), btnLerDepois: $('#btn-lerdepois'), btnPautas: $('#btn-pautas'), btnAgenda: $('#btn-agenda'),
   };
-  const APP_VERSAO = '1.12';
+  const APP_VERSAO = '1.13';
   const PAGINA = 40;
-  const estado = { regiao: 'todas', bairro: '', assunto: '', q: '', horas: 72, incluirGeral: true, pagina: 1, visao: 'normal', pauta: false };
+  const estado = { regiao: 'todas', bairro: '', assunto: '', q: '', horas: 72, incluirGeral: true, pagina: 1, visao: 'normal', pauta: false, agenda: false };
   let dados = { noticias: [], contagem: { regioes: {}, bairros: {} } };
   let cfg = { regioes: [] };
   let status = null;
   const mapaRegiao = new Map();
   const mapaBairro = new Map();
   const mapaAssunto = new Map();
+  const mapaAgenda = new Map();
 
   // ---------- utilidades ----------
   const norm = (s) => (s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
@@ -84,6 +85,7 @@
     if (qs.has('h')) estado.horas = Number(qs.get('h'));
     estado.assunto = qs.get('a') && mapaAssunto.has(qs.get('a')) ? qs.get('a') : '';
     estado.pauta = qs.get('p') === '1';
+    estado.agenda = qs.get('e') === '1';
     if (qs.has('geral')) estado.incluirGeral = qs.get('geral') !== '0';
   }
   function gravarHash() {
@@ -93,6 +95,7 @@
     if (estado.q) qs.set('q', estado.q);
     if (estado.assunto) qs.set('a', estado.assunto);
     if (estado.pauta) qs.set('p', '1');
+    if (estado.agenda) qs.set('e', '1');
     if (estado.horas !== 72) qs.set('h', String(estado.horas));
     if (!estado.incluirGeral) qs.set('geral', '0');
     const s = qs.toString();
@@ -117,6 +120,7 @@
       else if (!estado.incluirGeral && n.geral) return false;
       if (estado.assunto && !n.assuntos.includes(estado.assunto)) return false;
       if (estado.pauta && !n.pauta) return false;
+      if (estado.agenda && !n.agenda) return false;
       if (q) {
         const alvo = norm(`${n.titulo} ${n.resumo} ${n.fonte}`);
         if (!alvo.includes(q) && !n.bairros.some((b) => termosBairro.includes(b))) return false;
@@ -128,14 +132,17 @@
     // contagens respeitando período e busca, mas não região/bairro
     const limite = estado.horas ? Date.now() - estado.horas * 3600e3 : 0;
     const q = norm(estado.q.trim());
-    const c = { regioes: {}, bairros: {}, assuntos: {}, total: 0, geral: 0, noLugar: 0, pautas: 0 };
+    const c = { regioes: {}, bairros: {}, assuntos: {}, total: 0, geral: 0, noLugar: 0, pautas: 0, agenda: 0 };
     for (const n of dados.noticias) {
       if (!naVisao(n)) continue;
       if (limite && new Date(n.publicado_em).getTime() < limite) continue;
       if (q && !norm(`${n.titulo} ${n.resumo} ${n.fonte}`).includes(q)) continue;
       const noLugar = estado.bairro ? n.bairros.includes(estado.bairro) : estado.regiao !== 'todas' ? n.regioes.includes(estado.regiao) : (estado.incluirGeral || !n.geral);
-      if (noLugar && (!estado.assunto || n.assuntos.includes(estado.assunto)) && n.pauta) c.pautas++;
+      const noAssunto = !estado.assunto || n.assuntos.includes(estado.assunto);
+      if (noLugar && noAssunto && n.pauta && (!estado.agenda || n.agenda)) c.pautas++;
+      if (noLugar && noAssunto && n.agenda && (!estado.pauta || n.pauta)) c.agenda++;
       if (estado.pauta && !n.pauta) continue;
+      if (estado.agenda && !n.agenda) continue;
       if (noLugar) { c.noLugar++; for (const a of n.assuntos) c.assuntos[a] = (c.assuntos[a] || 0) + 1; }
       if (estado.assunto && !n.assuntos.includes(estado.assunto)) continue;
       c.total++;
@@ -328,6 +335,7 @@
       const s = document.createElement('span'); s.className = 'tag'; s.style.setProperty('--c', mapaRegiao.get(b.regiao)?.cor || 'var(--geral)'); s.textContent = b.nome; tags.appendChild(s);
     }
     if (!n.regioes.length && !n.bairros.length) { const s = document.createElement('span'); s.className = 'tag'; s.textContent = 'Floripa'; tags.appendChild(s); }
+    if (n.agenda && mapaAgenda.has(n.agenda)) { const a = mapaAgenda.get(n.agenda); const s = document.createElement('span'); s.className = 'tag agenda'; s.textContent = `${a.emoji} ${a.nome}`; tags.appendChild(s); }
     if (n.pauta) { const s = document.createElement('span'); s.className = 'tag pauta'; s.textContent = '📣 Pauta'; s.title = 'A comunidade reclama, cobra ou pede providências'; tags.appendChild(s); }
     for (const aid of n.assuntos) {
       const a = mapaAssunto.get(aid); if (!a) continue;
@@ -347,7 +355,16 @@
   function renderLista(itens) {
     el.lista.innerHTML = '';
     const mostrar = itens.slice(0, estado.pagina * PAGINA);
-    if (estado.pauta && !estado.bairro && mostrar.length) {
+    if (estado.agenda && !estado.pauta && mostrar.length) {
+      // Cursos e eventos: agrupados por tipo
+      const grupos = new Map();
+      for (const n of mostrar) { if (!grupos.has(n.agenda)) grupos.set(n.agenda, []); grupos.get(n.agenda).push(n); }
+      for (const t of mapaAgenda.values()) {
+        const lista = grupos.get(t.id); if (!lista) continue;
+        el.lista.appendChild(cabecalhoGrupo(`${t.emoji} ${t.nome}`, null, null, lista.length));
+        for (const n of lista) el.lista.appendChild(card(n));
+      }
+    } else if (estado.pauta && !estado.bairro && mostrar.length) {
       // Pautas da comunidade: agrupadas por bairro (a notícia entra no primeiro bairro identificado)
       const grupos = new Map();
       for (const n of mostrar) {
@@ -400,11 +417,13 @@
     $('.n', el.btnLerDepois).textContent = dados.noticias.filter((n) => lerDepois.tem(n) && !estaArquivada(n)).length;
     el.btnPautas.classList.toggle('ativo', estado.pauta);
     $('.n', el.btnPautas).textContent = c.pautas;
+    el.btnAgenda.classList.toggle('ativo', estado.agenda);
+    $('.n', el.btnAgenda).textContent = c.agenda;
     el.rotuloGeral.hidden = estado.regiao !== 'todas' || estado.visao !== 'normal';
     const itens = filtrar();
     const onde = estado.bairro ? mapaBairro.get(estado.bairro)?.nome : estado.regiao === 'todas' ? 'Florianópolis' : mapaRegiao.get(estado.regiao)?.nome;
     const assuntoNome = estado.assunto ? mapaAssunto.get(estado.assunto)?.nome : '';
-    el.contagem.textContent = `${itens.length} ${itens.length === 1 ? 'notícia' : 'notícias'}${estado.visao === 'arquivadas' ? (itens.length === 1 ? ' arquivada' : ' arquivadas') : estado.visao === 'lerdepois' ? ' para ler depois' : ''} · ${onde}${estado.pauta ? ' · Pautas da comunidade' : ''}${assuntoNome ? ` · ${assuntoNome}` : ''}${estado.q ? ` · “${estado.q}”` : ''}`;
+    el.contagem.textContent = `${itens.length} ${itens.length === 1 ? 'notícia' : 'notícias'}${estado.visao === 'arquivadas' ? (itens.length === 1 ? ' arquivada' : ' arquivadas') : estado.visao === 'lerdepois' ? ' para ler depois' : ''} · ${onde}${estado.pauta ? ' · Pautas da comunidade' : ''}${estado.agenda ? ' · Cursos e eventos' : ''}${assuntoNome ? ` · ${assuntoNome}` : ''}${estado.q ? ` · “${estado.q}”` : ''}`;
     renderLista(itens);
   }
   let toastTimer;
@@ -458,7 +477,8 @@
       mapaRegiao.clear(); mapaBairro.clear(); mapaAssunto.clear();
       for (const r of cfg.regioes || []) { mapaRegiao.set(r.id, r); for (const bb of r.bairros) mapaBairro.set(bb.id, { ...bb, regiao: r.id }); }
       for (const a of cfg.assuntos || []) mapaAssunto.set(a.id, a);
-      dados.noticias = (dados.noticias || []).map((x) => ({ ...x, regioes: x.regioes || [], bairros: x.bairros || [], assuntos: x.assuntos || [], pauta: !!x.pauta })).sort((x, y) => (y.publicado_em || '').localeCompare(x.publicado_em || ''));
+      mapaAgenda.clear(); for (const a of cfg.agenda || []) mapaAgenda.set(a.id, a);
+      dados.noticias = (dados.noticias || []).map((x) => ({ ...x, regioes: x.regioes || [], bairros: x.bairros || [], assuntos: x.assuntos || [], pauta: !!x.pauta, agenda: x.agenda || '' })).sort((x, y) => (y.publicado_em || '').localeCompare(x.publicado_em || ''));
       lerHash();
       sincronizarControles();
       render();
@@ -479,6 +499,7 @@
   const btnTopo = $('#btn-topo');
   btnTopo.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
   window.addEventListener('scroll', () => { btnTopo.classList.toggle('visivel', window.scrollY > 400); }, { passive: true });
+  el.btnAgenda.addEventListener('click', () => { estado.agenda = !estado.agenda; estado.pagina = 1; render(); });
   el.btnPautas.addEventListener('click', () => { estado.pauta = !estado.pauta; estado.pagina = 1; render(); });
   el.btnArquivadas.addEventListener('click', () => { estado.visao = estado.visao === 'arquivadas' ? 'normal' : 'arquivadas'; estado.pagina = 1; render(); window.scrollTo({ top: 0 }); });
   el.btnLerDepois.addEventListener('click', () => { estado.visao = estado.visao === 'lerdepois' ? 'normal' : 'lerdepois'; estado.pagina = 1; render(); window.scrollTo({ top: 0 }); });

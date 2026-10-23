@@ -96,6 +96,10 @@ button { font: inherit; color: inherit; cursor: pointer; }
 .btn-pautas.ativo .n { color: #1a1200; opacity: .8; }
 .tag.pauta { background: color-mix(in srgb, var(--centro) 22%, transparent); color: #b45309; font-weight: 700; }
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .tag.pauta { color: #fbbf24; } }
+.btn-agenda.ativo { background: var(--norte); border-color: var(--norte); color: #06202e; }
+.btn-agenda.ativo .n { color: #06202e; }
+.tag.agenda { background: color-mix(in srgb, var(--norte) 20%, transparent); color: #0369a1; font-weight: 700; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .tag.agenda { color: #7dd3fc; } }
 .btn-arquivadas { border: 1px solid var(--borda); background: var(--superficie); border-radius: 999px; padding: 6px 12px; font-size: .85rem; color: var(--texto-2); font-weight: 600; }
 .btn-arquivadas .n { opacity: .8; }
 .btn-arquivadas.ativo { background: var(--texto); color: var(--fundo); border-color: var(--texto); }
