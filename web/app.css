@@ -137,7 +137,6 @@ mark { background: color-mix(in srgb, var(--centro) 35%, transparent); color: in
 .aviso { background: color-mix(in srgb, var(--centro) 15%, transparent); border: 1px solid color-mix(in srgb, var(--centro) 40%, transparent); color: var(--texto); padding: 10px 14px; border-radius: 12px; font-size: .9rem; margin: 0 0 12px; }
 
 /* puxar para atualizar */
-body { overscroll-behavior-y: contain; }
 .puxar { position: fixed; top: 0; left: 0; right: 0; z-index: 20; display: flex; justify-content: center; align-items: flex-end; height: 56px; margin-top: -56px; pointer-events: none; transition: transform .2s ease, opacity .2s; opacity: 0; }
 .puxar > span { display: inline-flex; align-items: center; gap: 8px; position: relative; }
 .puxar .puxar-texto { background: var(--superficie); color: var(--texto); border: 1px solid var(--borda); box-shadow: var(--sombra); border-radius: 999px; padding: 8px 16px 8px 36px; font-size: .9rem; font-weight: 600; position: relative; }
