@@ -83,7 +83,7 @@ Nesse modo o botão "atualizar" do app dispara uma coleta na hora.
   onde pode ser restaurada arrastando para a direita. A lista fica salva só no aparelho.
 - **Notícias**: puxe a lista para baixo (ou toque no ícone de atualizar). O rodapé mostra a hora da última coleta.
 - **O app em si**: quando uma versão nova é publicada, aparece a faixa "Nova versão do app disponível" com o botão
-  **Atualizar agora**. O número da versão fica no rodapé (`app v1.9`). Ao mudar o app, altere `APP_VERSAO` em
+  **Atualizar agora**. O número da versão fica no rodapé (`app v1.10`). Ao mudar o app, altere `APP_VERSAO` em
   `web/app.js` e `VERSAO` em `web/sw.js` para o mesmo valor.
 
 ## Personalizando

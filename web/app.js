@@ -11,7 +11,7 @@
     puxar: $('#puxar'), puxarTexto: $('.puxar-texto'), avisoVersao: $('#aviso-versao'), btnVersao: $('#btn-versao'), toast: $('#toast'), versao: $('#versao'),
     toastTexto: $('#toast-texto'), toastAcao: $('#toast-acao'), btnArquivadas: $('#btn-arquivadas'), btnLerDepois: $('#btn-lerdepois'), btnPautas: $('#btn-pautas'),
   };
-  const APP_VERSAO = '1.9';
+  const APP_VERSAO = '1.10';
   const PAGINA = 40;
   const estado = { regiao: 'todas', bairro: '', assunto: '', q: '', horas: 72, incluirGeral: true, pagina: 1, visao: 'normal', pauta: false };
   let dados = { noticias: [], contagem: { regioes: {}, bairros: {} } };
@@ -446,6 +446,9 @@
   let tmr;
   el.busca.addEventListener('input', () => { clearTimeout(tmr); tmr = setTimeout(() => { estado.q = el.busca.value; estado.pagina = 1; render(); }, 180); });
   el.periodo.addEventListener('click', (e) => { const b = e.target.closest('button'); if (!b) return; estado.horas = Number(b.dataset.h); estado.pagina = 1; sincronizarControles(); render(); });
+  const btnTopo = $('#btn-topo');
+  btnTopo.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+  window.addEventListener('scroll', () => { btnTopo.classList.toggle('visivel', window.scrollY > 400); }, { passive: true });
   el.btnPautas.addEventListener('click', () => { estado.pauta = !estado.pauta; estado.pagina = 1; render(); });
   el.btnArquivadas.addEventListener('click', () => { estado.visao = estado.visao === 'arquivadas' ? 'normal' : 'arquivadas'; estado.pagina = 1; render(); window.scrollTo({ top: 0 }); });
   el.btnLerDepois.addEventListener('click', () => { estado.visao = estado.visao === 'lerdepois' ? 'normal' : 'lerdepois'; estado.pagina = 1; render(); window.scrollTo({ top: 0 }); });
