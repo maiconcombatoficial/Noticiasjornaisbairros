@@ -63,6 +63,8 @@ function abrir(caminho) {
       VALUES (@fonte_id,@nome,@tipo,@ultimo_ok,@ultimo_erro,@erro,@falhas_seguidas,@total_itens,@itens_ultima,@novos_ultima,@ultima_coleta)
       ON CONFLICT(fonte_id) DO UPDATE SET nome=excluded.nome, tipo=excluded.tipo, ultimo_ok=excluded.ultimo_ok, ultimo_erro=excluded.ultimo_erro, erro=excluded.erro,
       falhas_seguidas=excluded.falhas_seguidas, total_itens=excluded.total_itens, itens_ultima=excluded.itens_ultima, novos_ultima=excluded.novos_ultima, ultima_coleta=excluded.ultima_coleta`),
+    gnewsPendentes: db.prepare('SELECT id, url, titulo_chave FROM noticias WHERE via_gnews = 1 ORDER BY publicado_em DESC LIMIT ?'),
+    atualizarUrl: db.prepare('UPDATE noticias SET url = ?, via_gnews = 0 WHERE id = ?'),
     metaGet: db.prepare('SELECT valor FROM meta WHERE chave = ?'),
     metaSet: db.prepare('INSERT INTO meta (chave, valor) VALUES (?, ?) ON CONFLICT(chave) DO UPDATE SET valor = excluded.valor'),
   };
@@ -91,6 +93,16 @@ function abrir(caminho) {
       }
       st.inserir.run(n);
       return 'nova';
+    },
+    /** Notícias ainda com link do Google Notícias, das mais novas para as mais antigas. */
+    gnewsPendentes(limite = 80) {
+      return st.gnewsPendentes.all(limite);
+    },
+    /** Troca o link do Google pela URL direta; se já existir a mesma URL direta, remove a duplicata. */
+    resolverUrl(id, urlDireta, idDireto) {
+      if (idDireto !== id && st.porId.get(idDireto)) { st.apagar.run(id); return 'duplicada'; }
+      st.atualizarUrl.run(urlDireta, id);
+      return 'atualizada';
     },
     recentes(desdeIso, limite = 5000) {
       return st.recentes.all(desdeIso, limite).map(desserializar);

@@ -27,6 +27,7 @@ const CONFIG = {
   concorrencia: Number(process.env.CONCORRENCIA || 4),
   gnewsBairros: (process.env.GNEWS_BAIRROS || 'true') !== 'false',
   resolverGnews: (process.env.RESOLVER_GNEWS || 'true') !== 'false',
+  resolverAntigos: Number(process.env.RESOLVER_ANTIGOS || 80),
   falhasParaPausar: 8,
 };
 const USER_AGENT = 'Mozilla/5.0 (compatible; NoticiasFloripaBairros/1.0; +https://github.com/maiconcombatoficial/Noticiasjornaisbairros)';
@@ -195,6 +196,23 @@ async function emParalelo(itens, limite, fn) {
   return resultados;
 }
 
+/** Resolve, aos poucos, os links do Google Notícias de notícias já guardadas. */
+async function resolverAntigos(db, log) {
+  if (!CONFIG.resolverGnews || CONFIG.resolverAntigos <= 0) return 0;
+  const pendentes = db.gnewsPendentes(CONFIG.resolverAntigos);
+  if (!pendentes.length) return 0;
+  let ok = 0;
+  await emParalelo(pendentes, 3, async (n) => {
+    const direta = await resolverUrl(n.url, { timeoutMs: CONFIG.timeoutMs });
+    if (!direta) return;
+    const urlNorm = normalizarUrl(direta);
+    db.resolverUrl(n.id, urlNorm, hash(urlNorm));
+    ok++;
+  });
+  log(`links antigos do Google resolvidos: ${ok} de ${pendentes.length}`);
+  return ok;
+}
+
 /** Semeia o banco com o JSON exportado anteriormente (útil quando o banco é novo, ex.: GitHub Actions). */
 function semearDoJson(db) {
   const arq = path.join(DIR_WEB_API, 'noticias.json');
@@ -264,6 +282,7 @@ async function coletarTudo({ log = console.log } = {}) {
     const resultados = await emParalelo(fontes, CONFIG.concorrencia, (f) => coletarFonte(db, f, bairrosCfg, log, exclusoes));
     const novas = resultados.reduce((s, r) => s + (r.novas || 0), 0);
     const comErro = resultados.filter((r) => r.erro).length;
+    await resolverAntigos(db, log);
     const removidas = db.limparAntigas(new Date(Date.now() - CONFIG.retencaoDias * 86400000).toISOString());
     const exportadas = exportar(db, bairrosCfg, fontesCfg);
     db.meta('ultima_coleta', agoraIso());
