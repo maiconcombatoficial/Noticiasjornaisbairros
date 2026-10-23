@@ -42,3 +42,24 @@ test('título em outra cidade com resumo que cita Florianópolis de passagem nã
   const r = classificar({ titulo: 'São José inaugura hospital', resumo: 'Unidade atende também moradores de Florianópolis.' }, sc);
   assert.equal(r.floripa, false);
 });
+
+test('Ressacada é em Carianos, não na Trindade', () => {
+  const r = classificar({ titulo: 'Avaí anuncia acesso gratuito à Ressacada, em Florianópolis' }, sc);
+  assert.deepEqual(r.bairros, ['carianos']);
+});
+test('"no centro de inovação" não é o bairro Centro', () => {
+  const r = classificar({ titulo: 'Prefeitura de Florianópolis entrega cartas no centro de inovação ACATE' }, sc);
+  assert.deepEqual(r.bairros, []);
+});
+test('busca por bairro no Google: Praia Brava de Itajaí não entra', () => {
+  const r = classificar({ titulo: 'Escorpiões na Praia Brava: ação mobiliza Vigilância em Itajaí' }, sc);
+  assert.equal(r.floripa, false);
+});
+test('busca por bairro no Google: Jurerê sem citar Florianópolis entra', () => {
+  const r = classificar({ titulo: 'Halloween em Jurerê Internacional tem Túnel do Terror' }, sc);
+  assert.deepEqual(r.bairros, ['jurere']);
+});
+test('"capital de giro" não é Florianópolis', () => {
+  const r = classificar({ titulo: 'Banco libera capital de giro para pequenas empresas de SC' }, sc);
+  assert.equal(r.floripa, false);
+});

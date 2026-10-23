@@ -293,7 +293,48 @@
             "centro do rio",
             "centro da cidade de",
             "centro de curitiba",
-            "centro de porto alegre"
+            "centro de porto alegre",
+            "centro de inovacao",
+            "centro de informatica",
+            "centro de tecnologia",
+            "centro de ciencias",
+            "centro de excelencia",
+            "centro de apoio",
+            "centro de acolhimento",
+            "centro de especialidades",
+            "centro de zoonoses",
+            "centro de internacao",
+            "centro de detencao",
+            "centro de combate",
+            "centro de estudos",
+            "centro de memoria",
+            "centro de artes",
+            "centro de dia",
+            "centro de juventude",
+            "centro de assistencia",
+            "centro de hemodialise",
+            "centro de reabilitacao",
+            "centro de testagem",
+            "centro de vacinacao",
+            "centro de imunizacao",
+            "centro de cidadania",
+            "centro comunitario",
+            "centro esportivo",
+            "centro empresarial",
+            "centro automotivo",
+            "centro medico",
+            "centro clinico",
+            "centro educacional",
+            "centro administrativo",
+            "centro integrado",
+            "centro logistico",
+            "centro de compras",
+            "centro-sul",
+            "centro-norte",
+            "centro-leste",
+            "centro do pais",
+            "centro do estado",
+            "meio-campo"
           ]
         },
         {
@@ -330,9 +371,7 @@
             "praca santos dumont",
             "rua lauro linhares",
             "lauro linhares",
-            "rua delfino conti",
-            "estadio da ressacada",
-            "ressacada"
+            "rua delfino conti"
           ],
           "fracos": [
             "trindade"
@@ -871,7 +910,9 @@
             "base aerea de florianopolis",
             "base aerea",
             "rodovia aparicio ramos cordeiro",
-            "aparicio ramos cordeiro"
+            "aparicio ramos cordeiro",
+            "estadio da ressacada",
+            "ressacada"
           ]
         }
       ]

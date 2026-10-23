@@ -12,7 +12,7 @@ const path = require('node:path');
 const { parseFeed } = require('./rss');
 const { classificar, resumoConfig } = require('./classificar');
 const { abrir } = require('./db');
-const { hash, normalizarUrl, chaveTitulo, agoraIso } = require('./util');
+const { hash, normalizarUrl, chaveTitulo, agoraIso, normalizar } = require('./util');
 
 const RAIZ = path.resolve(__dirname, '..');
 const DIR_WEB_API = path.join(RAIZ, 'web', 'api');
@@ -60,6 +60,11 @@ async function baixar(url, timeoutMs) {
 }
 
 /** Monta a lista de fontes a coletar nesta rodada (fixas + lote rotativo de buscas por bairro). */
+function compilarExclusoes(fontesCfg) {
+  const padroes = (fontesCfg.excluir_titulos && fontesCfg.excluir_titulos.padroes) || [];
+  return padroes.map((p) => new RegExp(p, 'i'));
+}
+
 function montarFontes(db, fontesCfg, bairrosCfg) {
   const fontes = fontesCfg.fontes.filter((f) => f.ativa !== false).map((f) => ({ ...f }));
   const gb = fontesCfg.gnews_por_bairro || {};
@@ -74,9 +79,9 @@ function montarFontes(db, fontesCfg, bairrosCfg) {
         nome: `Google Notícias · ${b.nome}`,
         tipo: 'gnews',
         consulta: `"${b.nome}" Florianópolis`,
-        escopo: 'local',
-        regiao_fixa: b.regiao,
-        bairro_fixo: b.id,
+        // escopo 'sc': o título precisa citar o bairro (termo forte) ou Florianópolis; o Google casa pelo corpo
+        // do texto, e forçar o bairro trazia lixo ("Daniela Reinehr", "Praia Brava de Itajaí").
+        escopo: 'sc',
         rotativa: true,
       });
     }
@@ -118,7 +123,7 @@ function montarNoticia(item, fonte, cls) {
   };
 }
 
-async function coletarFonte(db, fonte, bairrosCfg, log) {
+async function coletarFonte(db, fonte, bairrosCfg, log, exclusoes = []) {
   const anterior = db.statusFonte(fonte.id) || { falhas_seguidas: 0, total_itens: 0 };
   if (!fonte.rotativa && anterior.falhas_seguidas >= CONFIG.falhasParaPausar) {
     // Fonte pausada por falhas repetidas: tenta de novo só de vez em quando (1 em 6 rodadas)
@@ -133,6 +138,8 @@ async function coletarFonte(db, fonte, bairrosCfg, log) {
     resultado.itens = feed.itens.length;
     db.transacao(() => {
       for (const item of feed.itens) {
+        const tituloNorm = normalizar(item.titulo);
+        if (exclusoes.some((re) => re.test(tituloNorm))) { resultado.descartadas++; continue; }
         const cls = classificar({ titulo: item.titulo, resumo: item.resumo, conteudo: item.conteudo }, fonte, bairrosCfg);
         if (!cls.floripa) { resultado.descartadas++; continue; }
         const n = montarNoticia(item, fonte, cls);
@@ -231,8 +238,9 @@ async function coletarTudo({ log = console.log } = {}) {
     if (semeadas) log(`banco novo: ${semeadas} notícias recuperadas do JSON anterior`);
     db.meta('rodada', Number(db.meta('rodada') || 0) + 1);
     const fontes = montarFontes(db, fontesCfg, bairrosCfg);
+    const exclusoes = compilarExclusoes(fontesCfg);
     log(`coletando ${fontes.length} fontes...`);
-    const resultados = await emParalelo(fontes, CONFIG.concorrencia, (f) => coletarFonte(db, f, bairrosCfg, log));
+    const resultados = await emParalelo(fontes, CONFIG.concorrencia, (f) => coletarFonte(db, f, bairrosCfg, log, exclusoes));
     const novas = resultados.reduce((s, r) => s + (r.novas || 0), 0);
     const comErro = resultados.filter((r) => r.erro).length;
     const removidas = db.limparAntigas(new Date(Date.now() - CONFIG.retencaoDias * 86400000).toISOString());

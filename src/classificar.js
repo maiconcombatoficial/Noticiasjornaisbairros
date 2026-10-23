@@ -30,8 +30,10 @@ function compilar(config) {
         regiao: r.id,
         exigeBairro: !!b.exige_bairro,
         reForte: fortes.length ? new RegExp(fortes.join('|'), 'i') : null,
+        // Termo fraco como lugar ("no Estreito"), mas não quando é início de outro nome ("no centro de inovação",
+        // "na Praia Brava de Itajaí"); "de Florianópolis/da cidade/da ilha/da capital" continuam valendo.
         reFracoLocativo: fracos.length
-          ? new RegExp(fracos.map((f) => `${LOCATIVOS}\\s+${esc(f)}(?![a-z0-9])|(?<![a-z0-9])${esc(f)},?\\s+(?:em|no|na|de)\\s+florian|(?<![a-z0-9])${esc(f)},\\s+(?:florianopolis|floripa|capital)`).join('|'), 'i')
+          ? new RegExp(fracos.map((f) => `${LOCATIVOS}\\s+${esc(f)}(?![a-z0-9])(?!\\s+(?:de|da|do|dos|das)\\s+(?!florianopolis|floripa|capital|cidade|ilha))|(?<![a-z0-9])${esc(f)},?\\s+(?:em|no|na|de)\\s+florian|(?<![a-z0-9])${esc(f)},\\s+(?:florianopolis|floripa|capital)`).join('|'), 'i')
           : null,
         reExige: fracos.length
           ? new RegExp(fracos.map((f) => `(?:bairro|comunidade|localidade d[aeo]|regiao d[aeo])\\s+${esc(f)}(?![a-z0-9])|(?<![a-z0-9])${esc(f)},?\\s+(?:em|no|na)\\s+florian|(?<![a-z0-9])${esc(f)},\\s+(?:florianopolis|floripa)|(?<![a-z0-9])${esc(f)},\\s+no\\s+(?:norte|sul|leste|centro|continente)`).join('|'), 'i')
@@ -45,7 +47,8 @@ function compilar(config) {
 }
 
 const RE_FLORIPA = /florianopolis|floripa|ilha de santa catarina|capital catarinense|capital de santa catarina|capital de sc|capital do estado de santa catarina|florianopolitan/i;
-const RE_CAPITAL_SC = /(?<![a-z0-9])(?:na|da|a|pela|para a|em) capital(?![a-z0-9])|(?<![a-z0-9])capital(?![a-z0-9])/i;
+// "na Capital" em fonte catarinense = Florianópolis; evita "capital de giro", "capital paulista" etc.
+const RE_CAPITAL_SC = /(?<![a-z0-9])(?:na|da|pela|para a|em|a|toda a) capital(?![a-z0-9])(?! (?:paulista|federal|gaucha|paranaense|mineira|carioca|fluminense|baiana|pernambucana|cearense|capixaba|de giro|social|humano|aberto|estrangeiro|politico|do pais|do brasil|do estado de (?!santa catarina)|argentina|uruguaia|chilena|portuguesa|francesa|americana|europeia|mundial))/i;
 const RE_OUTRAS_CIDADES = /(?<![a-z0-9])(sao jose|palhoca|biguacu|santo amaro da imperatriz|governador celso ramos|tijucas|joinville|blumenau|itajai|chapeco|criciuma|lages|balneario camboriu|jaragua do sul|brusque|tubarao|garopaba|imbituba)(?![a-z0-9])/i;
 
 let compilado = null;
