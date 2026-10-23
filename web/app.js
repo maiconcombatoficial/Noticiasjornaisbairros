@@ -11,7 +11,7 @@
     puxar: $('#puxar'), puxarTexto: $('.puxar-texto'), avisoVersao: $('#aviso-versao'), btnVersao: $('#btn-versao'), toast: $('#toast'), versao: $('#versao'),
     toastTexto: $('#toast-texto'), toastAcao: $('#toast-acao'), btnArquivadas: $('#btn-arquivadas'), btnLerDepois: $('#btn-lerdepois'), btnPautas: $('#btn-pautas'),
   };
-  const APP_VERSAO = '1.11';
+  const APP_VERSAO = '1.12';
   const PAGINA = 40;
   const estado = { regiao: 'todas', bairro: '', assunto: '', q: '', horas: 72, incluirGeral: true, pagina: 1, visao: 'normal', pauta: false };
   let dados = { noticias: [], contagem: { regioes: {}, bairros: {} } };
@@ -338,14 +338,39 @@
     }
     return frag;
   }
+  function cabecalhoGrupo(texto, cor, aoClicar, n) {
+    const h = document.createElement('div'); h.className = 'dia' + (aoClicar ? ' grupo-bairro' : '');
+    h.innerHTML = `${cor ? `<span class="ponto" style="--c:${cor}"></span>` : ''}<span>${texto}</span>${n !== undefined ? `<span class="n">${n}</span>` : ''}`;
+    if (aoClicar) { h.title = 'Ver só este bairro'; h.onclick = aoClicar; }
+    return h;
+  }
   function renderLista(itens) {
     el.lista.innerHTML = '';
     const mostrar = itens.slice(0, estado.pagina * PAGINA);
-    let diaAtual = '';
-    for (const n of mostrar) {
-      const d = rotuloDia(n.publicado_em);
-      if (d !== diaAtual) { diaAtual = d; const h = document.createElement('div'); h.className = 'dia'; h.textContent = d; el.lista.appendChild(h); }
-      el.lista.appendChild(card(n));
+    if (estado.pauta && !estado.bairro && mostrar.length) {
+      // Pautas da comunidade: agrupadas por bairro (a notícia entra no primeiro bairro identificado)
+      const grupos = new Map();
+      for (const n of mostrar) {
+        const bid = n.bairros.find((b) => mapaBairro.has(b)) || '';
+        const rid = bid ? mapaBairro.get(bid).regiao : (n.regioes.find((r) => mapaRegiao.has(r)) || '');
+        const chave = bid || (rid ? `regiao:${rid}` : 'geral');
+        if (!grupos.has(chave)) grupos.set(chave, { bid, rid, itens: [] });
+        grupos.get(chave).itens.push(n);
+      }
+      const ordem = [...grupos.values()].sort((a, b) => (!!b.bid - !!a.bid) || (!!b.rid - !!a.rid) || b.itens.length - a.itens.length || nomeGrupo(a).localeCompare(nomeGrupo(b), 'pt-BR'));
+      for (const g of ordem) {
+        const r = mapaRegiao.get(g.rid);
+        const clique = g.bid ? () => { estado.regiao = g.rid; estado.bairro = g.bid; estado.pagina = 1; render(); window.scrollTo({ top: 0 }); } : null;
+        el.lista.appendChild(cabecalhoGrupo(nomeGrupo(g), r ? r.cor : 'var(--geral)', clique, g.itens.length));
+        for (const n of g.itens) el.lista.appendChild(card(n));
+      }
+    } else {
+      let diaAtual = '';
+      for (const n of mostrar) {
+        const d = rotuloDia(n.publicado_em);
+        if (d !== diaAtual) { diaAtual = d; el.lista.appendChild(cabecalhoGrupo(d)); }
+        el.lista.appendChild(card(n));
+      }
     }
     el.vazio.hidden = itens.length > 0;
     el.mais.hidden = mostrar.length >= itens.length;
@@ -358,6 +383,11 @@
         ? 'Tente outro período, outro bairro ou veja as notícias gerais de Floripa.'
         : 'A primeira coleta ainda não rodou. Em modo servidor ela começa sozinha; no GitHub Pages, aguarde a ação agendada.';
     }
+  }
+  function nomeGrupo(g) {
+    if (g.bid) { const b = mapaBairro.get(g.bid); const r = mapaRegiao.get(g.rid); return `${b.nome}${r ? ` · ${r.nome}` : ''}`; }
+    if (g.rid) return `${mapaRegiao.get(g.rid).nome} · sem bairro identificado`;
+    return 'Florianópolis · sem bairro identificado';
   }
   function render() {
     gravarHash();
