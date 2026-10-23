@@ -25,6 +25,10 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
+      - name: Partir sempre do main mais recente (evita conflito no JSON entre execuções)
+        run: |
+          git fetch origin main
+          git reset --hard origin/main
       - name: Coletar notícias
         env:
           DB_PATH: ":memory:"
@@ -39,8 +43,13 @@ jobs:
             echo "nada mudou"
           else
             git commit -m "coleta automática: $(date -u +'%Y-%m-%d %H:%M UTC')"
-            git pull --rebase origin main || true
-            git push
+            for tentativa in 1 2 3; do
+              git push && break
+              echo "push falhou, tentando de novo ($tentativa)"
+              git fetch origin main
+              # se outra execução gravou o JSON antes, a versão desta coleta (mais nova) prevalece
+              git rebase -X theirs origin/main || { git rebase --abort; git reset --hard origin/main; break; }
+            done
           fi
       - name: Preparar artefato do site
         uses: actions/upload-pages-artifact@v3
