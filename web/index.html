@@ -55,6 +55,7 @@
       <button data-h="0">Tudo</button>
     </div>
     <label class="alternar" id="rotulo-geral"><input type="checkbox" id="incluir-geral" checked> <span>Incluir notícias gerais de Floripa</span></label>
+    <button class="btn-arquivadas" id="btn-arquivadas" type="button">Arquivadas <span class="n">0</span></button>
   </div>
   <p class="resumo-contagem" id="contagem"></p>
   <div id="lista" class="lista" aria-live="polite"></div>
@@ -72,7 +73,7 @@
   <a href="https://github.com/maiconcombatoficial/Noticiasjornaisbairros" target="_blank" rel="noopener">código</a>
 </footer>
 
-<div id="toast" class="toast" hidden></div>
+<div id="toast" class="toast" hidden><span id="toast-texto"></span><button id="toast-acao" type="button" hidden></button></div>
 <dialog id="dlg-escolha" class="folha">
   <div class="folha-alca"></div>
   <div class="folha-cabecalho">
@@ -93,6 +94,8 @@
 
 <template id="tpl-card">
   <article class="card">
+    <div class="card-fundo"><span class="fundo-arquivar">Arquivar</span><span class="fundo-restaurar">Restaurar</span></div>
+    <div class="card-movel">
     <a class="card-link" target="_blank" rel="noopener">
       <div class="card-img" hidden><img loading="lazy" alt=""></div>
       <div class="card-corpo">
@@ -111,6 +114,11 @@
         <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="m8.6 13.5 6.8 4M15.4 6.5l-6.8 4"/></svg>
         Compartilhar
       </button>
+      <button class="acao arquivar" type="button" title="Arquivar (ou arraste para a esquerda)">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7h18v13H3z"/><path d="M2 4h20v3H2z"/><path d="M10 12h4"/></svg>
+        <span>Arquivar</span>
+      </button>
+    </div>
     </div>
   </article>
 </template>
