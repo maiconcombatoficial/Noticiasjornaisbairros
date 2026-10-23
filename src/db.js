@@ -21,6 +21,7 @@ CREATE TABLE IF NOT EXISTS noticias (
   assuntos TEXT NOT NULL DEFAULT '[]',
   pauta INTEGER DEFAULT 0,
   agenda TEXT NOT NULL DEFAULT '',
+  agenda_temas TEXT NOT NULL DEFAULT '[]',
   geral INTEGER DEFAULT 0
 );
 CREATE INDEX IF NOT EXISTS idx_noticias_pub ON noticias(publicado_em);
@@ -51,12 +52,13 @@ function abrir(caminho) {
   if (!colunas.includes('assuntos')) db.exec("ALTER TABLE noticias ADD COLUMN assuntos TEXT NOT NULL DEFAULT '[]'");
   if (!colunas.includes('pauta')) db.exec('ALTER TABLE noticias ADD COLUMN pauta INTEGER DEFAULT 0');
   if (!colunas.includes('agenda')) db.exec("ALTER TABLE noticias ADD COLUMN agenda TEXT NOT NULL DEFAULT ''");
+  if (!colunas.includes('agenda_temas')) db.exec("ALTER TABLE noticias ADD COLUMN agenda_temas TEXT NOT NULL DEFAULT '[]'");
 
   const st = {
     porId: db.prepare('SELECT id, via_gnews FROM noticias WHERE id = ?'),
     porTitulo: db.prepare('SELECT id, via_gnews, fonte_id FROM noticias WHERE titulo_chave = ? LIMIT 1'),
-    inserir: db.prepare(`INSERT INTO noticias (id,url,titulo,titulo_chave,resumo,imagem,fonte_id,fonte_nome,via_gnews,publicado_em,coletado_em,regioes,bairros,assuntos,pauta,agenda,geral)
-      VALUES (@id,@url,@titulo,@titulo_chave,@resumo,@imagem,@fonte_id,@fonte_nome,@via_gnews,@publicado_em,@coletado_em,@regioes,@bairros,@assuntos,@pauta,@agenda,@geral)`),
+    inserir: db.prepare(`INSERT INTO noticias (id,url,titulo,titulo_chave,resumo,imagem,fonte_id,fonte_nome,via_gnews,publicado_em,coletado_em,regioes,bairros,assuntos,pauta,agenda,agenda_temas,geral)
+      VALUES (@id,@url,@titulo,@titulo_chave,@resumo,@imagem,@fonte_id,@fonte_nome,@via_gnews,@publicado_em,@coletado_em,@regioes,@bairros,@assuntos,@pauta,@agenda,@agenda_temas,@geral)`),
     apagar: db.prepare('DELETE FROM noticias WHERE id = ?'),
     recentes: db.prepare('SELECT * FROM noticias WHERE publicado_em >= ? ORDER BY publicado_em DESC LIMIT ?'),
     limpar: db.prepare('DELETE FROM noticias WHERE publicado_em < ?'),
@@ -160,6 +162,7 @@ function desserializar(linha) {
     assuntos: JSON.parse(linha.assuntos || '[]'),
     pauta: !!linha.pauta,
     agenda: linha.agenda || '',
+    agenda_temas: JSON.parse(linha.agenda_temas || '[]'),
     geral: !!linha.geral,
     via_gnews: !!linha.via_gnews,
   };

@@ -43,8 +43,10 @@ nacional, esporte e entretenimento ficam de fora de propósito.
 ### Cursos e eventos
 
 O botão **🎓 Cursos e eventos** lista matérias sobre cursos, treinamentos, oficinas, palestras, seminários e eventos
-com inscrição, data ou entrada gratuita, agrupadas em Cursos e treinamentos, Palestras e encontros, e Eventos.
-Regras em `src/agenda.json` (`src/agenda.js`).
+com inscrição, data ou entrada gratuita. Dentro da área há dois seletores: **Formato** (cursos, workshops e oficinas,
+palestras, congressos e seminários, festivais e feiras, mutirões e ações gratuitas, corridas e esportivos) e **Tema**
+(marketing, negócios, tecnologia, saúde, educação, trânsito, cidadania, cultura, esporte, meio ambiente, emprego,
+gastronomia, família, religião). A lista vem agrupada por tema. Regras em `src/agenda.json` (`src/agenda.js`).
 
 ## Rodando localmente
 
@@ -90,7 +92,7 @@ Nesse modo o botão "atualizar" do app dispara uma coleta na hora.
   onde pode ser restaurada arrastando para a direita. A lista fica salva só no aparelho.
 - **Notícias**: puxe a lista para baixo (ou toque no ícone de atualizar). O rodapé mostra a hora da última coleta.
 - **O app em si**: quando uma versão nova é publicada, aparece a faixa "Nova versão do app disponível" com o botão
-  **Atualizar agora**. O número da versão fica no rodapé (`app v1.14`). Ao mudar o app, altere `APP_VERSAO` em
+  **Atualizar agora**. O número da versão fica no rodapé (`app v1.15`). Ao mudar o app, altere `APP_VERSAO` em
   `web/app.js` e `VERSAO` em `web/sw.js` para o mesmo valor.
 
 ## Senha de acesso (proteção simples)

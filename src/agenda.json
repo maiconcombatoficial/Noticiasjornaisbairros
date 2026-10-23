@@ -1,23 +1,115 @@
 {
-  "_comentario": "Detector de agenda: cursos, treinamentos, oficinas, palestras, seminários e eventos. Cada tipo tem termos próprios (valem 3; no título 6). 'sinais' são pistas de que é algo para participar (inscrições, vagas, gratuito, data, horário, local) e valem 2 (título 4). Entra na agenda com pontuação >= 8 e pelo menos um termo de tipo. 'bloqueios' derrubam (resultados esportivos, política eleitoral, polícia). Regra: precisa de termo de tipo no título e de pelo menos um sinal de participação.",
+  "_comentario": "Agenda (cursos e eventos). 'formatos': o tipo do evento (vale 3; no título 6) — a matéria precisa ter um formato no título. 'sinais': pistas de participação (inscrições, vagas, gratuito, data, horário) valem 2 (título 4). Entra com pontuação >= 8 e pelo menos um sinal. 'temas': assunto do evento (termo vale 1, no título 2; até 2 temas com >= 2 pontos; sem tema = 'outros'). 'bloqueios' derrubam (resultados esportivos, eleições, polícia, outras cidades). Em empate de pontuação vale a ordem dos formatos no arquivo (os mais específicos primeiro).",
   "minimo": 8,
-  "tipos": {
+  "formatos": {
+    "oficina": {
+      "nome": "Workshops e oficinas",
+      "emoji": "🛠️",
+      "termos": ["oficina", "oficinas", "workshop", "workshops", "aula pratica", "imersao", "bootcamp", "mentoria", "mentorias", "laboratorio", "hands-on", "masterclass", "vivencia", "vivencias"]
+    },
+    "acao": {
+      "nome": "Mutirões e ações gratuitas",
+      "emoji": "🤝",
+      "termos": ["mutirao", "mutiroes", "acao social", "acao gratuita", "acoes gratuitas", "atendimento gratuito", "atendimentos gratuitos", "servicos gratuitos", "castracao", "feira de adocao", "adocao de animais", "doacao de sangue", "campanha de vacinacao", "vacinacao", "cadastramento", "cadastro", "dia d", "limpeza de praia", "plantio", "bazar beneficente", "campanha de doacao", "arrecadacao", "atendimento", "atendimentos", "exames gratuitos", "consultas gratuitas"]
+    },
+    "esportivo": {
+      "nome": "Corridas e eventos esportivos",
+      "emoji": "🏃",
+      "termos": ["corrida", "corridas", "maratona", "meia maratona", "caminhada", "pedalada", "passeio ciclistico", "torneio", "campeonato aberto", "competicao", "circuito", "travessia", "regata", "desafio", "treino aberto", "treinao", "yoga", "pilates", "aulao de", "trilha guiada", "surf", "etapa"]
+    },
+    "congresso": {
+      "nome": "Congressos, seminários e feiras de negócios",
+      "emoji": "🏛️",
+      "termos": ["congresso", "congressos", "seminario", "seminarios", "simposio", "simposios", "summit", "forum", "conferencia", "conferencias", "convencao", "jornada", "semana academica", "feira de negocios", "encontro empresarial", "rodada de negocios", "hackathon", "arena", "expo", "exposicao de negocios", "cupula"]
+    },
+    "palestra": {
+      "nome": "Palestras e rodas de conversa",
+      "emoji": "🎤",
+      "termos": ["palestra", "palestras", "palestrante", "palestrantes", "webinar", "webinario", "roda de conversa", "rodas de conversa", "bate-papo", "debate", "debates", "mesa-redonda", "mesa redonda", "talk", "talks", "aula magna", "lancamento de livro", "audiencia publica", "reuniao aberta", "reuniao comunitaria", "assembleia", "plenaria", "cafe com", "meetup", "encontro", "encontros", "live"]
+    },
     "curso": {
       "nome": "Cursos e treinamentos",
       "emoji": "🎓",
-      "termos": ["curso", "cursos", "minicurso", "minicursos", "capacitacao", "capacitacoes", "treinamento", "treinamentos", "qualificacao", "qualificacao profissional", "formacao", "oficina", "oficinas", "workshop", "workshops", "aula aberta", "aulas abertas", "aulao", "aula gratuita", "aulas gratuitas", "pre-vestibular", "cursinho", "curso gratuito", "cursos gratuitos", "curso tecnico", "cursos tecnicos", "bolsa de estudo", "bolsas de estudo", "mentoria", "imersao", "bootcamp", "turma", "turmas", "matriculas abertas", "matricula", "certificado", "certificacao", "ead", "a distancia", "senac", "senai", "sesc", "sebrae", "ifsc", "ufsc", "udesc"]
-    },
-    "palestra": {
-      "nome": "Palestras e encontros",
-      "emoji": "🎤",
-      "termos": ["palestra", "palestras", "seminario", "seminarios", "congresso", "congressos", "simposio", "simposios", "webinar", "webinario", "roda de conversa", "rodas de conversa", "bate-papo", "debate", "debates", "mesa-redonda", "mesa redonda", "encontro", "encontros", "forum", "conferencia", "conferencias", "summit", "talk", "talks", "aula magna", "lancamento de livro", "sarau", "audiencia publica", "reuniao aberta", "reuniao comunitaria", "assembleia", "plenaria", "cafe com", "meetup", "networking", "jornada", "semana academica"]
+      "termos": ["curso", "cursos", "minicurso", "minicursos", "capacitacao", "capacitacoes", "treinamento", "treinamentos", "qualificacao", "qualificacao profissional", "formacao", "aula aberta", "aulas abertas", "aulao", "aula gratuita", "aulas gratuitas", "pre-vestibular", "cursinho", "curso gratuito", "cursos gratuitos", "curso tecnico", "cursos tecnicos", "bolsa de estudo", "bolsas de estudo", "turma", "turmas", "matriculas abertas", "certificado", "certificacao", "ead", "a distancia", "senac", "senai", "disciplina", "aulas"]
     },
     "evento": {
-      "nome": "Eventos",
+      "nome": "Festivais, shows e feiras",
       "emoji": "🎟️",
-      "termos": ["evento", "eventos", "festival", "festivais", "feira", "feiras", "feirinha", "mostra", "exposicao", "exposicoes", "mutirao", "mutiroes", "programacao", "festa", "festas", "show", "shows", "apresentacao", "apresentacoes", "espetaculo", "espetaculos", "corrida", "caminhada", "pedalada", "passeio ciclistico", "campeonato aberto", "torneio", "competicao", "circuito", "edicao", "comemoracao", "celebracao", "cerimonia", "inauguracao", "lancamento", "acao social", "acao gratuita", "dia d", "domingo no parque", "virada", "reveillon", "carnaval", "halloween", "natal", "pascoa", "aniversario", "semana", "campanha de vacinacao", "atendimento gratuito", "atendimentos gratuitos", "servicos gratuitos", "cadastro", "cadastramento", "castracao", "feira de adocao", "adocao de animais", "doacao de sangue", "bazar", "brecho", "sarau", "roda de samba", "baile", "oktoberfest", "fenaostra", "festa da tainha", "parada", "passeata", "ato", "vigilia", "missa", "procissao", "musica", "concerto", "concertos", "orquestra", "instrumental", "teatro", "peca", "pecas", "cinema", "sessao gratuita", "exibicao", "recital", "coral", "dança", "danca", "balé", "bale", "circo", "stand-up", "stand up", "comedia", "humor", "slam", "batalha de rima", "cultural", "culturais"]
+      "termos": ["evento", "eventos", "festival", "festivais", "feira", "feiras", "feirinha", "mostra", "exposicao", "exposicoes", "programacao", "festa", "festas", "show", "shows", "apresentacao", "apresentacoes", "espetaculo", "espetaculos", "edicao", "comemoracao", "celebracao", "cerimonia", "inauguracao", "lancamento", "reveillon", "carnaval", "halloween", "natal", "pascoa", "aniversario", "virada", "musica", "concerto", "concertos", "orquestra", "instrumental", "teatro", "peca", "pecas", "cinema", "sessao gratuita", "exibicao", "recital", "coral", "danca", "bale", "circo", "stand-up", "stand up", "comedia", "humor", "sarau", "slam", "batalha de rima", "cultural", "culturais", "baile", "roda de samba", "oktoberfest", "fenaostra", "festa da tainha", "parada", "passeata", "ato", "vigilia", "missa", "procissao", "bazar", "brecho", "domingo no parque", "semana"]
     }
   },
-  "sinais": ["inscricoes", "inscricoes abertas", "inscricao", "inscreva-se", "inscrever", "inscritos", "vagas", "vagas limitadas", "vagas gratuitas", "gratuito", "gratuita", "gratuitos", "gratuitas", "de graca", "entrada franca", "entrada gratuita", "aberto ao publico", "aberta ao publico", "abertas ao publico", "participe", "participacao", "participantes", "publico em geral", "ingressos", "ingresso", "lotacao", "local", "horario", "horarios", "programacao completa", "acontece", "acontecera", "sera realizado", "sera realizada", "realiza", "promove", "oferece", "recebe", "sedia", "tera", "terao", "vai ter", "vao ter", "comeca", "nesta", "neste", "nesta sexta", "neste sabado", "neste domingo", "nesta segunda", "nesta terca", "nesta quarta", "nesta quinta", "proximo sabado", "proximo domingo", "fim de semana", "final de semana", "no dia", "dia 1", "dia 2", "dia 3", "dia 4", "dia 5", "dia 6", "dia 7", "dia 8", "dia 9", "dia 10", "dia 11", "dia 12", "dia 13", "dia 14", "dia 15", "dia 16", "dia 17", "dia 18", "dia 19", "dia 20", "dia 21", "dia 22", "dia 23", "dia 24", "dia 25", "dia 26", "dia 27", "dia 28", "dia 29", "dia 30", "dia 31", "de outubro", "de novembro", "de dezembro", "de janeiro", "de fevereiro", "de marco", "de abril", "de maio", "de junho", "de julho", "de agosto", "de setembro", "ate o dia", "a partir de", "das 8h", "das 9h", "das 10h", "das 13h", "das 14h", "das 18h", "das 19h", "as 9h", "as 10h", "as 14h", "as 17h", "as 18h", "as 19h", "as 20h", "19h", "20h", "9h", "14h", "edital", "edicao", "agenda", "confira", "veja como participar", "como participar", "saiba como", "chamada", "chamada publica", "selecao", "processo seletivo", "celebra", "estreia", "traz", "reune", "abre as portas", "abre", "convida", "chega a florianopolis", "chega a floripa", "desembarca"],
+  "temas": {
+    "marketing": {
+      "nome": "Marketing e vendas",
+      "emoji": "📣",
+      "termos": ["marketing", "vendas", "vendedor", "vendedores", "redes sociais", "instagram", "tiktok", "publicidade", "propaganda", "branding", "marca", "marcas", "conteudo", "influenciador", "influenciadores", "trafego pago", "e-commerce", "comercio eletronico", "comunicacao", "atendimento ao cliente", "cliente", "clientes", "black friday", "varejo"]
+    },
+    "negocios": {
+      "nome": "Negócios e empreendedorismo",
+      "emoji": "💼",
+      "termos": ["empreendedorismo", "empreendedor", "empreendedores", "empreendedora", "empreendedoras", "negocio", "negocios", "empresa", "empresas", "empresario", "empresarios", "empresarias", "startup", "startups", "inovacao", "gestao", "lideranca", "financas", "financeiro", "investimento", "investimentos", "mei", "sebrae", "cdl", "acate", "fiesc", "sesi", "comercio", "franquia", "networking", "pequenos negocios", "microempresa", "contabilidade", "credito", "imobiliario", "creci", "hotelaria", "turismo"]
+    },
+    "tecnologia": {
+      "nome": "Tecnologia e inteligência artificial",
+      "emoji": "💻",
+      "termos": ["tecnologia", "inteligencia artificial", "ia", "programacao", "software", "dados", "digital", "robotica", "games", "game", "ciencia", "cientifico", "hackathon", "informatica", "computacao", "internet", "aplicativo", "apps", "nuvem", "cibernetica", "seguranca digital"]
+    },
+    "saude": {
+      "nome": "Saúde e bem-estar",
+      "emoji": "🏥",
+      "termos": ["saude", "bem-estar", "medicina", "medico", "medicos", "enfermagem", "nutricao", "psicologia", "saude mental", "yoga", "meditacao", "vacinacao", "vacina", "outubro rosa", "novembro azul", "primeiros socorros", "odontologia", "fisioterapia", "exames", "consulta", "consultas", "hospital", "prevencao", "cancer", "diabetes", "mamografia", "doacao de sangue", "terapia", "autismo", "saude da mulher", "gestante", "gestantes", "amamentacao"]
+    },
+    "educacao": {
+      "nome": "Educação, Enem e concursos",
+      "emoji": "📚",
+      "termos": ["enem", "vestibular", "concurso", "concursos", "redacao", "escola", "escolas", "estudante", "estudantes", "professor", "professores", "alfabetizacao", "matricula", "matriculas", "bolsa", "bolsas", "idiomas", "ingles", "espanhol", "universidade", "ufsc", "udesc", "ifsc", "pos-graduacao", "mestrado", "doutorado", "pesquisa", "educacao", "ensino", "alunos", "aulao", "pre-vestibular", "transferencia"]
+    },
+    "transito": {
+      "nome": "Trânsito e segurança viária",
+      "emoji": "🚗",
+      "termos": ["transito", "mobilidade", "motorista", "motoristas", "motociclista", "motociclistas", "ciclista", "ciclistas", "seguranca viaria", "direcao defensiva", "detran", "habilitacao", "cnh", "maio amarelo", "pedestre", "pedestres", "acidentes de transito", "velocidade", "bicicleta", "ciclovia", "transporte", "onibus"]
+    },
+    "cidadania": {
+      "nome": "Cidadania e comunidade",
+      "emoji": "🏘️",
+      "termos": ["cidadania", "politica", "politicas publicas", "vereador", "vereadores", "camara", "audiencia publica", "orcamento participativo", "conselho", "conselhos", "participacao popular", "direitos", "direitos humanos", "mulher", "mulheres", "violencia contra a mulher", "lgbt", "igualdade racial", "racial", "idosos", "pessoa com deficiencia", "acessibilidade", "comunidade", "comunitario", "comunitaria", "associacao de moradores", "moradores", "bairro", "seguranca publica", "defesa civil", "voluntariado", "voluntarios", "ong", "solidariedade", "social"]
+    },
+    "cultura": {
+      "nome": "Cultura e arte",
+      "emoji": "🎭",
+      "termos": ["cultura", "cultural", "arte", "artes", "artista", "artistas", "musica", "musical", "teatro", "cinema", "filme", "filmes", "danca", "literatura", "livro", "livros", "poesia", "fotografia", "exposicao", "museu", "patrimonio", "artesanato", "renda de bilro", "rendeira", "rendeiras", "boi de mamao", "folclore", "historia", "memoria", "cosplay", "geek", "anime", "fantastico", "terror", "halloween", "show", "festival", "samba", "rock", "jazz", "choro", "orquestra", "coral"]
+    },
+    "esporte": {
+      "nome": "Esporte e lazer",
+      "emoji": "⚽",
+      "termos": ["esporte", "esportes", "esportivo", "esportiva", "corrida", "maratona", "surf", "vela", "futebol", "volei", "ciclismo", "pedalada", "caminhada", "natacao", "skate", "jiu-jitsu", "lutas", "trilha", "trilhas", "atletas", "atleta", "academia", "treino", "beach tennis", "futevolei", "tenis", "praia", "lazer", "parque", "recreacao", "brincadeiras"]
+    },
+    "ambiente": {
+      "nome": "Meio ambiente e animais",
+      "emoji": "🌿",
+      "termos": ["meio ambiente", "ambiental", "sustentabilidade", "sustentavel", "reciclagem", "residuos", "lixo", "limpeza de praia", "plantio", "arvores", "mata atlantica", "animais", "animal", "adocao", "castracao", "pets", "pet", "cachorro", "cachorros", "gato", "gatos", "clima", "mar", "oceano", "mangue", "dunas", "restinga", "biodiversidade", "fauna", "flora", "horta", "agroecologia", "organicos", "bambu", "energia solar", "eficiencia energetica"]
+    },
+    "emprego": {
+      "nome": "Emprego e qualificação profissional",
+      "emoji": "🧰",
+      "termos": ["emprego", "empregos", "vagas de emprego", "trabalho", "trabalhador", "trabalhadores", "qualificacao profissional", "curriculo", "entrevista", "carreira", "profissionalizante", "profissional", "jovem aprendiz", "estagio", "estagios", "feirao de empregos", "sine", "mercado de trabalho", "recrutamento", "contratacao", "garcom", "panificacao", "confeitaria", "eletricista", "pedreiro", "cuidador", "informatica basica", "costura", "cabeleireiro", "manicure", "barbeiro"]
+    },
+    "gastronomia": {
+      "nome": "Gastronomia",
+      "emoji": "🍽️",
+      "termos": ["gastronomia", "gastronomico", "gastronomica", "culinaria", "culinario", "cozinha", "chef", "chefs", "cerveja", "cervejas", "vinho", "vinhos", "ostras", "ostra", "tainha", "fenaostra", "festa da tainha", "comida", "comidas", "restaurante", "restaurantes", "bar", "bares", "food", "hamburguer", "pizza", "cafe", "doces", "sabores", "receita", "receitas"]
+    },
+    "familia": {
+      "nome": "Crianças e família",
+      "emoji": "👨‍👩‍👧",
+      "termos": ["crianca", "criancas", "infantil", "infantis", "familia", "familias", "pais", "maes", "bebes", "bebe", "gestantes", "adolescente", "adolescentes", "jovem", "jovens", "juventude", "idoso", "idosos", "terceira idade", "brinquedos", "brincadeiras", "contacao de historias", "recreacao infantil", "parquinho", "escola infantil", "creche"]
+    },
+    "religiao": {
+      "nome": "Religião e espiritualidade",
+      "emoji": "🙏",
+      "termos": ["missa", "igreja", "paroquia", "religioso", "religiosa", "espiritualidade", "espiritual", "retiro", "culto", "procissao", "romaria", "santo", "santa", "padre", "pastor", "catolica", "evangelica", "umbanda", "candomble", "terreiro", "oracao", "novena", "festa do divino", "nossa senhora"]
+    }
+  },
+  "sinais": ["inscricoes", "inscricoes abertas", "inscricao", "inscreva-se", "inscrever", "inscritos", "vagas", "vagas limitadas", "vagas gratuitas", "gratuito", "gratuita", "gratuitos", "gratuitas", "de graca", "entrada franca", "entrada gratuita", "aberto ao publico", "aberta ao publico", "abertas ao publico", "participe", "participacao", "participantes", "publico em geral", "ingressos", "ingresso", "lotacao", "local", "horario", "horarios", "programacao completa", "acontece", "acontecera", "sera realizado", "sera realizada", "realiza", "promove", "oferece", "recebe", "sedia", "tera", "terao", "vai ter", "vao ter", "comeca", "nesta", "neste", "nesta sexta", "neste sabado", "neste domingo", "nesta segunda", "nesta terca", "nesta quarta", "nesta quinta", "proximo sabado", "proximo domingo", "fim de semana", "final de semana", "no dia", "dia 1", "dia 2", "dia 3", "dia 4", "dia 5", "dia 6", "dia 7", "dia 8", "dia 9", "dia 10", "dia 11", "dia 12", "dia 13", "dia 14", "dia 15", "dia 16", "dia 17", "dia 18", "dia 19", "dia 20", "dia 21", "dia 22", "dia 23", "dia 24", "dia 25", "dia 26", "dia 27", "dia 28", "dia 29", "dia 30", "dia 31", "de outubro", "de novembro", "de dezembro", "de janeiro", "de fevereiro", "de marco", "de abril", "de maio", "de junho", "de julho", "de agosto", "de setembro", "ate o dia", "a partir de", "das 8h", "das 9h", "das 10h", "das 13h", "das 14h", "das 18h", "das 19h", "as 9h", "as 10h", "as 14h", "as 17h", "as 18h", "as 19h", "as 20h", "19h", "20h", "9h", "14h", "edital", "edicao", "agenda", "confira", "veja como participar", "como participar", "saiba como", "chamada", "chamada publica", "selecao", "processo seletivo", "celebra", "estreia", "traz", "reune", "abre as portas", "abre", "convida", "chega a florianopolis", "chega a floripa", "desembarca", "debate", "discute", "aborda", "apresenta", "ensina", "mostra como", "tera como tema", "tem como tema", "com o tema"],
   "bloqueios": ["lula", "bolsonaro", "stf", "tse", "datafolha", "pesquisa eleitoral", "2 turno", "1 turno", "turno", "eleicao", "eleicoes", "candidato", "candidata", "urna", "urnas", "voto", "votos", "preso", "presa", "prisao", "homicidio", "assassinato", "morto", "morta", "baleado", "baleada", "tiroteio", "trafico", "drogas", "assalto", "furto", "roubo", "acidente", "colisao", "capotamento", "avai x", "x avai", "figueirense x", "x figueirense", "placar", "vence por", "empata", "derrota", "rodada", "serie b", "serie c", "tabela", "classificacao", "previsao do tempo", "loteria", "mega-sena", "horoscopo", "resultado da", "resultado do", "elege", "eleito", "eleita", "vencedores", "vencedor", "vencedora", "premiados", "ranking", "melhor do brasil", "melhores do brasil", "recorde", "videos:", "video:", "jornal do almoco", "gp de", "formula 1", "modela", "colecao", "debate presidencial", "debate eleitoral", "debate da globo", "checagem", "blumenau", "joinville", "chapeco", "criciuma", "lages", "itajai", "balneario camboriu", "jaragua do sul", "brusque", "tubarao", "laguna", "navegantes", "sao paulo", "curitiba", "porto alegre", "rio de janeiro", "interlagos", "brasilia", "protagonismo", "balanco", "encerra", "encerrou", "encerrada", "aconteceu", "reuniu", "foi realizado", "foi realizada", "teve", "tiveram", "lotou", "sucesso de publico", "fora do ar", "abre loja", "abre lojas", "inaugura loja", "descontos", "liquidacao", "g1 para", "thais neves", "divulga ufsc", "certificado de vacina", "alto tiete", "foz do iguacu", "palmas", "cirurgioes", "reconstrucao"]
 }

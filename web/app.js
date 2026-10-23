@@ -9,11 +9,11 @@
     atualizado: $('#atualizado'), fontesOk: $('#fontes-ok'), btnAtualizar: $('#btn-atualizar'), btnFontes: $('#btn-fontes'),
     dlg: $('#dlg-fontes'), fecharFontes: $('#fechar-fontes'), listaFontes: $('#lista-fontes'), tpl: $('#tpl-card'),
     puxar: $('#puxar'), puxarTexto: $('.puxar-texto'), avisoVersao: $('#aviso-versao'), btnVersao: $('#btn-versao'), toast: $('#toast'), versao: $('#versao'),
-    toastTexto: $('#toast-texto'), toastAcao: $('#toast-acao'), btnArquivadas: $('#btn-arquivadas'), btnLerDepois: $('#btn-lerdepois'), btnPautas: $('#btn-pautas'), btnAgenda: $('#btn-agenda'),
+    toastTexto: $('#toast-texto'), toastAcao: $('#toast-acao'), btnArquivadas: $('#btn-arquivadas'), btnLerDepois: $('#btn-lerdepois'), btnPautas: $('#btn-pautas'), btnAgenda: $('#btn-agenda'), subAgenda: $('#sub-agenda'), selFormato: $('#sel-formato'), selTema: $('#sel-tema'),
   };
-  const APP_VERSAO = '1.14';
+  const APP_VERSAO = '1.15';
   const PAGINA = 40;
-  const estado = { regiao: 'todas', bairro: '', assunto: '', q: '', horas: 72, incluirGeral: true, pagina: 1, visao: 'normal', pauta: false, agenda: false };
+  const estado = { regiao: 'todas', bairro: '', assunto: '', q: '', horas: 72, incluirGeral: true, pagina: 1, visao: 'normal', pauta: false, agenda: false, formato: '', tema: '' };
   let dados = { noticias: [], contagem: { regioes: {}, bairros: {} } };
   let cfg = { regioes: [] };
   let status = null;
@@ -21,6 +21,7 @@
   const mapaBairro = new Map();
   const mapaAssunto = new Map();
   const mapaAgenda = new Map();
+  const mapaTema = new Map();
 
   // ---------- utilidades ----------
   const norm = (s) => (s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
@@ -86,6 +87,8 @@
     estado.assunto = qs.get('a') && mapaAssunto.has(qs.get('a')) ? qs.get('a') : '';
     estado.pauta = qs.get('p') === '1';
     estado.agenda = qs.get('e') === '1';
+    estado.formato = qs.get('f') && mapaAgenda.has(qs.get('f')) ? qs.get('f') : '';
+    estado.tema = qs.get('t') && mapaTema.has(qs.get('t')) ? qs.get('t') : '';
     if (qs.has('geral')) estado.incluirGeral = qs.get('geral') !== '0';
   }
   function gravarHash() {
@@ -96,6 +99,8 @@
     if (estado.assunto) qs.set('a', estado.assunto);
     if (estado.pauta) qs.set('p', '1');
     if (estado.agenda) qs.set('e', '1');
+    if (estado.agenda && estado.formato) qs.set('f', estado.formato);
+    if (estado.agenda && estado.tema) qs.set('t', estado.tema);
     if (estado.horas !== 72) qs.set('h', String(estado.horas));
     if (!estado.incluirGeral) qs.set('geral', '0');
     const s = qs.toString();
@@ -121,6 +126,8 @@
       if (estado.assunto && !n.assuntos.includes(estado.assunto)) return false;
       if (estado.pauta && !n.pauta) return false;
       if (estado.agenda && !n.agenda) return false;
+      if (estado.agenda && estado.formato && n.agenda !== estado.formato) return false;
+      if (estado.agenda && estado.tema && !n.agenda_temas.includes(estado.tema)) return false;
       if (q) {
         const alvo = norm(`${n.titulo} ${n.resumo} ${n.fonte}`);
         if (!alvo.includes(q) && !n.bairros.some((b) => termosBairro.includes(b))) return false;
@@ -132,7 +139,7 @@
     // contagens respeitando período e busca, mas não região/bairro
     const limite = estado.horas ? Date.now() - estado.horas * 3600e3 : 0;
     const q = norm(estado.q.trim());
-    const c = { regioes: {}, bairros: {}, assuntos: {}, total: 0, geral: 0, noLugar: 0, pautas: 0, agenda: 0 };
+    const c = { regioes: {}, bairros: {}, assuntos: {}, total: 0, geral: 0, noLugar: 0, pautas: 0, agenda: 0, formatos: {}, temas: {} };
     for (const n of dados.noticias) {
       if (!naVisao(n)) continue;
       if (limite && new Date(n.publicado_em).getTime() < limite) continue;
@@ -143,6 +150,12 @@
       if (noLugar && noAssunto && n.agenda && (!estado.pauta || n.pauta)) c.agenda++;
       if (estado.pauta && !n.pauta) continue;
       if (estado.agenda && !n.agenda) continue;
+      if (estado.agenda && noLugar && noAssunto) {
+        if (!estado.tema || n.agenda_temas.includes(estado.tema)) c.formatos[n.agenda] = (c.formatos[n.agenda] || 0) + 1;
+        if (!estado.formato || n.agenda === estado.formato) for (const t of n.agenda_temas) c.temas[t] = (c.temas[t] || 0) + 1;
+      }
+      if (estado.agenda && estado.formato && n.agenda !== estado.formato) continue;
+      if (estado.agenda && estado.tema && !n.agenda_temas.includes(estado.tema)) continue;
       if (noLugar) { c.noLugar++; for (const a of n.assuntos) c.assuntos[a] = (c.assuntos[a] || 0) + 1; }
       if (estado.assunto && !n.assuntos.includes(estado.assunto)) continue;
       c.total++;
@@ -219,6 +232,15 @@
         for (const b of bairros) ops.appendChild(opcao(b.nome, c.bairros[b.id] || 0, estado.bairro === b.id, r.cor, () => { estado.regiao = r.id; estado.bairro = b.id; }));
         el.escolhaLista.appendChild(ops);
       }
+    } else if (escolhaTipo === 'formato' || escolhaTipo === 'tema') {
+      const ehFormato = escolhaTipo === 'formato';
+      const mapa = ehFormato ? mapaAgenda : mapaTema; const cont = ehFormato ? c.formatos : c.temas;
+      const ops = document.createElement('div'); ops.className = 'folha-opcoes';
+      const totalAtual = Object.values(cont).reduce((a, b) => a + b, 0);
+      if (!filtro) ops.appendChild(opcao(ehFormato ? 'Todos os formatos' : 'Todos os temas', ehFormato ? totalAtual : c.agenda, ehFormato ? !estado.formato : !estado.tema, null, () => { if (ehFormato) estado.formato = ''; else estado.tema = ''; }, true));
+      const lista = [...mapa.values()].filter((a) => !filtro || norm(a.nome).includes(filtro)).sort((x, y) => (cont[y.id] || 0) - (cont[x.id] || 0));
+      for (const a of lista) ops.appendChild(opcao(`${a.emoji || ''} ${a.nome}`.trim(), cont[a.id] || 0, ehFormato ? estado.formato === a.id : estado.tema === a.id, null, () => { if (ehFormato) estado.formato = a.id; else estado.tema = a.id; }));
+      el.escolhaLista.appendChild(ops);
     } else {
       const ops = document.createElement('div'); ops.className = 'folha-opcoes';
       if (!filtro) ops.appendChild(opcao('Todos os assuntos', c.noLugar, !estado.assunto, null, () => { estado.assunto = ''; }, true));
@@ -230,14 +252,17 @@
   }
   function abrirEscolha(tipo) {
     escolhaTipo = tipo;
-    el.escolhaTitulo.textContent = tipo === 'bairro' ? 'Escolher bairro' : 'Escolher assunto';
-    el.escolhaBusca.value = ''; el.escolhaBusca.placeholder = tipo === 'bairro' ? 'Buscar bairro…' : 'Buscar assunto…';
+    const titulos = { bairro: 'Escolher bairro', assunto: 'Escolher assunto', formato: 'Formato do evento', tema: 'Tema do evento' };
+    el.escolhaTitulo.textContent = titulos[tipo] || 'Escolher';
+    el.escolhaBusca.value = ''; el.escolhaBusca.placeholder = 'Filtrar…';
     renderEscolha();
     el.dlgEscolha.showModal();
     el.escolhaLista.scrollTop = 0;
   }
   el.selBairro.addEventListener('click', () => abrirEscolha('bairro'));
   el.selAssunto.addEventListener('click', () => abrirEscolha('assunto'));
+  el.selFormato.addEventListener('click', () => abrirEscolha('formato'));
+  el.selTema.addEventListener('click', () => abrirEscolha('tema'));
   el.escolhaBusca.addEventListener('input', renderEscolha);
   el.fecharEscolha.addEventListener('click', () => el.dlgEscolha.close());
   el.dlgEscolha.addEventListener('click', (e) => { if (e.target === el.dlgEscolha) el.dlgEscolha.close(); });
@@ -335,7 +360,10 @@
       const s = document.createElement('span'); s.className = 'tag'; s.style.setProperty('--c', mapaRegiao.get(b.regiao)?.cor || 'var(--geral)'); s.textContent = b.nome; tags.appendChild(s);
     }
     if (!n.regioes.length && !n.bairros.length) { const s = document.createElement('span'); s.className = 'tag'; s.textContent = 'Floripa'; tags.appendChild(s); }
-    if (n.agenda && mapaAgenda.has(n.agenda)) { const a = mapaAgenda.get(n.agenda); const s = document.createElement('span'); s.className = 'tag agenda'; s.textContent = `${a.emoji} ${a.nome}`; tags.appendChild(s); }
+    if (n.agenda && mapaAgenda.has(n.agenda)) {
+      const a = mapaAgenda.get(n.agenda); const s = document.createElement('span'); s.className = 'tag agenda'; s.textContent = `${a.emoji} ${a.nome}`; tags.appendChild(s);
+      for (const tid of n.agenda_temas) { const t = mapaTema.get(tid); if (!t || tid === 'outros') continue; const st = document.createElement('span'); st.className = 'tag tema'; st.textContent = `${t.emoji} ${t.nome}`; tags.appendChild(st); }
+    }
     if (n.pauta) { const s = document.createElement('span'); s.className = 'tag pauta'; s.textContent = '📣 Pauta'; s.title = 'A comunidade reclama, cobra ou pede providências'; tags.appendChild(s); }
     for (const aid of n.assuntos) {
       const a = mapaAssunto.get(aid); if (!a) continue;
@@ -356,12 +384,16 @@
     el.lista.innerHTML = '';
     const mostrar = itens.slice(0, estado.pagina * PAGINA);
     if (estado.agenda && !estado.pauta && mostrar.length) {
-      // Cursos e eventos: agrupados por tipo
+      // Cursos e eventos: agrupados por tema (ou por formato, quando um tema já foi escolhido)
+      const porTema = !estado.tema;
       const grupos = new Map();
-      for (const n of mostrar) { if (!grupos.has(n.agenda)) grupos.set(n.agenda, []); grupos.get(n.agenda).push(n); }
-      for (const t of mapaAgenda.values()) {
-        const lista = grupos.get(t.id); if (!lista) continue;
-        el.lista.appendChild(cabecalhoGrupo(`${t.emoji} ${t.nome}`, null, null, lista.length));
+      for (const n of mostrar) { const k = porTema ? (n.agenda_temas[0] || 'outros') : n.agenda; if (!grupos.has(k)) grupos.set(k, []); grupos.get(k).push(n); }
+      const mapa = porTema ? mapaTema : mapaAgenda;
+      const ordem = [...grupos.keys()].sort((a, b) => (a === 'outros') - (b === 'outros') || grupos.get(b).length - grupos.get(a).length);
+      for (const k of ordem) {
+        const t = mapa.get(k) || { emoji: '📌', nome: 'Outros' }; const lista = grupos.get(k);
+        const clique = porTema && k !== 'outros' ? () => { estado.tema = k; estado.pagina = 1; render(); window.scrollTo({ top: 0 }); } : null;
+        el.lista.appendChild(cabecalhoGrupo(`${t.emoji} ${t.nome}`, null, clique, lista.length));
         for (const n of lista) el.lista.appendChild(card(n));
       }
     } else if (estado.pauta && !estado.bairro && mostrar.length) {
@@ -419,11 +451,15 @@
     $('.n', el.btnPautas).textContent = c.pautas;
     el.btnAgenda.classList.toggle('ativo', estado.agenda);
     $('.n', el.btnAgenda).textContent = c.agenda;
+    el.subAgenda.hidden = !estado.agenda;
+    const f = estado.formato ? mapaAgenda.get(estado.formato) : null; const t = estado.tema ? mapaTema.get(estado.tema) : null;
+    $('.seletor-valor', el.selFormato).textContent = f ? `${f.emoji} ${f.nome}` : 'Todos'; el.selFormato.classList.toggle('ativo', !!f);
+    $('.seletor-valor', el.selTema).textContent = t ? `${t.emoji} ${t.nome}` : 'Todos'; el.selTema.classList.toggle('ativo', !!t);
     el.rotuloGeral.hidden = estado.regiao !== 'todas' || estado.visao !== 'normal';
     const itens = filtrar();
     const onde = estado.bairro ? mapaBairro.get(estado.bairro)?.nome : estado.regiao === 'todas' ? 'Florianópolis' : mapaRegiao.get(estado.regiao)?.nome;
     const assuntoNome = estado.assunto ? mapaAssunto.get(estado.assunto)?.nome : '';
-    el.contagem.textContent = `${itens.length} ${itens.length === 1 ? 'notícia' : 'notícias'}${estado.visao === 'arquivadas' ? (itens.length === 1 ? ' arquivada' : ' arquivadas') : estado.visao === 'lerdepois' ? ' para ler depois' : ''} · ${onde}${estado.pauta ? ' · Pautas da comunidade' : ''}${estado.agenda ? ' · Cursos e eventos' : ''}${assuntoNome ? ` · ${assuntoNome}` : ''}${estado.q ? ` · “${estado.q}”` : ''}`;
+    el.contagem.textContent = `${itens.length} ${itens.length === 1 ? 'notícia' : 'notícias'}${estado.visao === 'arquivadas' ? (itens.length === 1 ? ' arquivada' : ' arquivadas') : estado.visao === 'lerdepois' ? ' para ler depois' : ''} · ${onde}${estado.pauta ? ' · Pautas da comunidade' : ''}${estado.agenda ? ' · Cursos e eventos' : ''}${estado.agenda && estado.formato ? ` · ${mapaAgenda.get(estado.formato)?.nome}` : ''}${estado.agenda && estado.tema ? ` · ${mapaTema.get(estado.tema)?.nome}` : ''}${assuntoNome ? ` · ${assuntoNome}` : ''}${estado.q ? ` · “${estado.q}”` : ''}`;
     renderLista(itens);
   }
   let toastTimer;
@@ -478,7 +514,8 @@
       for (const r of cfg.regioes || []) { mapaRegiao.set(r.id, r); for (const bb of r.bairros) mapaBairro.set(bb.id, { ...bb, regiao: r.id }); }
       for (const a of cfg.assuntos || []) mapaAssunto.set(a.id, a);
       mapaAgenda.clear(); for (const a of cfg.agenda || []) mapaAgenda.set(a.id, a);
-      dados.noticias = (dados.noticias || []).map((x) => ({ ...x, regioes: x.regioes || [], bairros: x.bairros || [], assuntos: x.assuntos || [], pauta: !!x.pauta, agenda: x.agenda || '' })).sort((x, y) => (y.publicado_em || '').localeCompare(x.publicado_em || ''));
+      mapaTema.clear(); for (const a of cfg.agenda_temas || []) mapaTema.set(a.id, a);
+      dados.noticias = (dados.noticias || []).map((x) => ({ ...x, regioes: x.regioes || [], bairros: x.bairros || [], assuntos: x.assuntos || [], pauta: !!x.pauta, agenda: x.agenda || '', agenda_temas: x.agenda_temas || [] })).sort((x, y) => (y.publicado_em || '').localeCompare(x.publicado_em || ''));
       lerHash();
       sincronizarControles();
       render();
@@ -499,7 +536,7 @@
   const btnTopo = $('#btn-topo');
   btnTopo.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
   window.addEventListener('scroll', () => { btnTopo.classList.toggle('visivel', window.scrollY > 400); }, { passive: true });
-  el.btnAgenda.addEventListener('click', () => { estado.agenda = !estado.agenda; estado.pagina = 1; render(); });
+  el.btnAgenda.addEventListener('click', () => { estado.agenda = !estado.agenda; if (!estado.agenda) { estado.formato = ''; estado.tema = ''; } estado.pagina = 1; render(); });
   el.btnPautas.addEventListener('click', () => { estado.pauta = !estado.pauta; estado.pagina = 1; render(); });
   el.btnArquivadas.addEventListener('click', () => { estado.visao = estado.visao === 'arquivadas' ? 'normal' : 'arquivadas'; estado.pagina = 1; render(); window.scrollTo({ top: 0 }); });
   el.btnLerDepois.addEventListener('click', () => { estado.visao = estado.visao === 'lerdepois' ? 'normal' : 'lerdepois'; estado.pagina = 1; render(); window.scrollTo({ top: 0 }); });
