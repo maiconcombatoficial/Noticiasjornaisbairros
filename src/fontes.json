@@ -1,0 +1,58 @@
+{
+  "_comentario": "tipo 'rss' = feed direto do portal. tipo 'gnews' = busca no Google Notícias (RSS), que cobre qualquer portal, inclusive os sem feed. escopo: 'local' = só fala de Florianópolis (toda notícia entra, mesmo sem citar a cidade); 'sc' = estadual (exige citar Florianópolis/Capital/bairro); 'br' = nacional (exige citar Florianópolis). Fontes com falhas seguidas são desativadas sozinhas e aparecem em /api/status.json.",
+  "fontes": [
+    { "id": "ndmais", "nome": "ND Mais", "tipo": "rss", "url": "https://ndmais.com.br/feed/", "escopo": "sc", "site": "https://ndmais.com.br" },
+    { "id": "ndmais-floripa", "nome": "ND Mais · Florianópolis", "tipo": "rss", "url": "https://ndmais.com.br/noticias/florianopolis/feed/", "escopo": "local", "site": "https://ndmais.com.br" },
+    { "id": "nsctotal", "nome": "NSC Total", "tipo": "rss", "url": "https://www.nsctotal.com.br/feed", "escopo": "sc", "site": "https://www.nsctotal.com.br" },
+    { "id": "nsctotal-floripa", "nome": "NSC Total · Florianópolis", "tipo": "rss", "url": "https://www.nsctotal.com.br/cidades/florianopolis/feed", "escopo": "local", "site": "https://www.nsctotal.com.br" },
+    { "id": "g1sc", "nome": "g1 Santa Catarina", "tipo": "rss", "url": "https://g1.globo.com/rss/g1/sc/santa-catarina/", "escopo": "sc", "site": "https://g1.globo.com/sc/santa-catarina/" },
+    { "id": "scc10", "nome": "SCC10", "tipo": "rss", "url": "https://scc10.com.br/feed/", "escopo": "sc", "site": "https://scc10.com.br" },
+    { "id": "ricmais", "nome": "RIC Mais SC", "tipo": "rss", "url": "https://ricmais.com.br/feed/", "escopo": "sc", "site": "https://ricmais.com.br" },
+    { "id": "ocp", "nome": "OCP News", "tipo": "rss", "url": "https://ocp.news/feed/", "escopo": "sc", "site": "https://ocp.news" },
+    { "id": "tvbv", "nome": "TVBV / Band SC", "tipo": "rss", "url": "https://www.tvbv.com.br/feed/", "escopo": "sc", "site": "https://www.tvbv.com.br" },
+    { "id": "correiosc", "nome": "Correio SC", "tipo": "rss", "url": "https://www.correiosc.com.br/feed/", "escopo": "sc", "site": "https://www.correiosc.com.br" },
+    { "id": "tudoaquisc", "nome": "Tudo Aqui SC (Jovem Pan)", "tipo": "rss", "url": "https://tudoaquisc.com.br/feed/", "escopo": "sc", "site": "https://tudoaquisc.com.br" },
+    { "id": "catarinas", "nome": "Portal Catarinas", "tipo": "rss", "url": "https://catarinas.info/feed/", "escopo": "sc", "site": "https://catarinas.info" },
+    { "id": "gazeta-sc", "nome": "Gazeta do Povo · SC", "tipo": "rss", "url": "https://www.gazetadopovo.com.br/feed/rss/santa-catarina.xml", "escopo": "sc", "site": "https://www.gazetadopovo.com.br/santa-catarina/" },
+
+    { "id": "portaldailha", "nome": "Portal da Ilha", "tipo": "rss", "url": "https://portaldailha.com.br/feed/", "escopo": "local", "site": "https://portaldailha.com.br" },
+    { "id": "imagemdailha", "nome": "Imagem da Ilha", "tipo": "rss", "url": "https://www.imagemdailha.com.br/feed/", "escopo": "local", "site": "https://www.imagemdailha.com.br" },
+    { "id": "floripanoticias", "nome": "Floripa Notícias", "tipo": "rss", "url": "https://www.floripanoticias.com.br/feed/", "escopo": "local", "site": "https://www.floripanoticias.com.br" },
+    { "id": "noticiasfloripa", "nome": "Notícias Floripa", "tipo": "rss", "url": "https://noticiasfloripa.com/feed/", "escopo": "local", "site": "https://noticiasfloripa.com" },
+    { "id": "floripamanha", "nome": "FloripAmanhã", "tipo": "rss", "url": "https://floripamanha.org/feed/", "escopo": "local", "site": "https://floripamanha.org" },
+    { "id": "floripacentro", "nome": "Floripa Centro", "tipo": "rss", "url": "https://floripacentro.com.br/feed/", "escopo": "local", "site": "https://floripacentro.com.br" },
+    { "id": "jornalconexao", "nome": "Jornal Conexão", "tipo": "rss", "url": "https://jornalconexao.com.br/feed/", "escopo": "local", "site": "https://jornalconexao.com.br" },
+    { "id": "portalgrandefloripa", "nome": "Portal Grande Florianópolis", "tipo": "rss", "url": "https://portalgrandeflorianopolis.com.br/feed/", "escopo": "sc", "site": "https://portalgrandeflorianopolis.com.br" },
+    { "id": "deolhonailha", "nome": "De Olho na Ilha", "tipo": "rss", "url": "https://www.deolhonailha.com.br/feed/", "escopo": "local", "site": "https://www.deolhonailha.com.br" },
+    { "id": "ufsc", "nome": "Notícias da UFSC", "tipo": "rss", "url": "https://noticias.ufsc.br/feed/", "escopo": "local", "site": "https://noticias.ufsc.br", "bairro_fixo": "trindade" },
+    { "id": "pmf", "nome": "Prefeitura de Florianópolis", "tipo": "gnews", "consulta": "site:pmf.sc.gov.br", "escopo": "local", "site": "https://www.pmf.sc.gov.br" },
+    { "id": "cmf", "nome": "Câmara de Vereadores de Florianópolis", "tipo": "gnews", "consulta": "site:cmf.sc.gov.br", "escopo": "local", "site": "https://www.cmf.sc.gov.br" },
+
+    { "id": "portalnortedailha", "nome": "Portal Norte da Ilha", "tipo": "gnews", "consulta": "site:portalnortedailha.com.br", "escopo": "local", "site": "https://portalnortedailha.com.br", "regiao_fixa": "norte" },
+    { "id": "suldefloripa", "nome": "Sul de Floripa", "tipo": "rss", "url": "https://suldefloripa.com.br/feed/", "escopo": "local", "site": "https://suldefloripa.com.br", "regiao_fixa": "sul" },
+    { "id": "jornaldocampeche", "nome": "Jornal do Campeche", "tipo": "rss", "url": "https://www.jornaldocampeche.com.br/feed/", "escopo": "local", "site": "https://www.jornaldocampeche.com.br", "regiao_fixa": "sul" },
+    { "id": "ducampeche", "nome": "DuCampeche", "tipo": "rss", "url": "https://ducampeche.com.br/feed/", "escopo": "local", "site": "https://ducampeche.com.br", "regiao_fixa": "sul", "bairro_fixo": "campeche" },
+
+    { "id": "gnews-florianopolis", "nome": "Google Notícias · Florianópolis", "tipo": "gnews", "consulta": "Florianópolis", "escopo": "br" },
+    { "id": "gnews-floripa", "nome": "Google Notícias · Floripa", "tipo": "gnews", "consulta": "Floripa", "escopo": "br" },
+    { "id": "gnews-norte", "nome": "Google Notícias · Norte da Ilha", "tipo": "gnews", "consulta": "\"Norte da Ilha\" Florianópolis", "escopo": "local", "regiao_fixa": "norte" },
+    { "id": "gnews-sul", "nome": "Google Notícias · Sul da Ilha", "tipo": "gnews", "consulta": "\"Sul da Ilha\" Florianópolis", "escopo": "local", "regiao_fixa": "sul" },
+    { "id": "gnews-leste", "nome": "Google Notícias · Leste da Ilha", "tipo": "gnews", "consulta": "(\"Lagoa da Conceição\" OR \"Barra da Lagoa\" OR \"Rio Vermelho\") Florianópolis", "escopo": "local", "regiao_fixa": "leste" },
+    { "id": "gnews-continente", "nome": "Google Notícias · Continente", "tipo": "gnews", "consulta": "(Estreito OR Coqueiros OR Capoeiras OR \"Jardim Atlântico\" OR \"Monte Cristo\") Florianópolis", "escopo": "local", "regiao_fixa": "continente" },
+    { "id": "gnews-centro", "nome": "Google Notícias · Centro", "tipo": "gnews", "consulta": "(\"Centro de Florianópolis\" OR Trindade OR Itacorubi OR Agronômica OR \"Saco Grande\") Florianópolis", "escopo": "local", "regiao_fixa": "centro" },
+    { "id": "gnews-nsc", "nome": "Google Notícias · NSC Total", "tipo": "gnews", "consulta": "site:nsctotal.com.br Florianópolis", "escopo": "local" },
+    { "id": "gnews-nd", "nome": "Google Notícias · ND Mais", "tipo": "gnews", "consulta": "site:ndmais.com.br Florianópolis", "escopo": "local" },
+    { "id": "gnews-g1", "nome": "Google Notícias · g1 SC", "tipo": "gnews", "consulta": "site:g1.globo.com Florianópolis", "escopo": "local" },
+    { "id": "gnews-scc10", "nome": "Google Notícias · SCC10", "tipo": "gnews", "consulta": "site:scc10.com.br Florianópolis", "escopo": "local" },
+    { "id": "gnews-ric", "nome": "Google Notícias · RIC Mais", "tipo": "gnews", "consulta": "site:ricmais.com.br Florianópolis", "escopo": "local" },
+    { "id": "gnews-cbn", "nome": "Google Notícias · CBN Floripa", "tipo": "gnews", "consulta": "\"CBN Floripa\" OR site:cbn.globoradio.globo.com Florianópolis", "escopo": "local" },
+    { "id": "gnews-guaruja", "nome": "Google Notícias · Rádio Guarujá", "tipo": "gnews", "consulta": "site:radioguaruja.com.br", "escopo": "local" },
+    { "id": "gnews-agora", "nome": "Google Notícias · Agora Floripa", "tipo": "gnews", "consulta": "site:agorafloripa.com.br", "escopo": "local" },
+    { "id": "gnews-folha", "nome": "Google Notícias · nacionais", "tipo": "gnews", "consulta": "Florianópolis (site:folha.uol.com.br OR site:estadao.com.br OR site:oglobo.globo.com OR site:cnnbrasil.com.br OR site:uol.com.br)", "escopo": "br" }
+  ],
+  "gnews_por_bairro": {
+    "_comentario": "Além das fontes acima, o coletor faz uma busca no Google Notícias por bairro (\"<nome do bairro>\" Florianópolis). Para não exagerar, a cada coleta roda apenas um lote; o lote avança em rodízio.",
+    "ativo": true,
+    "lote": 12
+  }
+}

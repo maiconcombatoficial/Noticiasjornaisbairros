@@ -1,0 +1,14 @@
+{
+  "name": "noticias-floripa-bairros",
+  "version": "1.0.0",
+  "description": "Notícias de Florianópolis por região (Norte, Centro, Continente, Sul e Leste da Ilha) e por bairro, reunidas de todos os portais possíveis.",
+  "private": true,
+  "license": "MIT",
+  "engines": { "node": ">=22.13" },
+  "scripts": {
+    "start": "node --disable-warning=ExperimentalWarning src/servidor.js",
+    "coletar": "node --disable-warning=ExperimentalWarning src/coletor.js",
+    "exportar": "node --disable-warning=ExperimentalWarning src/coletor.js --so-exportar",
+    "test": "node --disable-warning=ExperimentalWarning --test \"tests/**/*.test.js\""
+  }
+}

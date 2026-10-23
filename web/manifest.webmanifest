@@ -1,0 +1,16 @@
+{
+  "name": "Floripa por Bairro — Notícias de Florianópolis",
+  "short_name": "Floripa Bairros",
+  "description": "Notícias de Florianópolis por região (Norte, Centro, Continente, Sul e Leste da Ilha) e por bairro, de todos os portais.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#0b1324",
+  "theme_color": "#0b5fff",
+  "lang": "pt-BR",
+  "icons": [
+    { "src": "icons/icone.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
+    { "src": "icons/icone-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icons/icone-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}

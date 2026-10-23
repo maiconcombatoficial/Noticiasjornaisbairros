@@ -1,0 +1,1026 @@
+{
+  "_comentario": "Divisão baseada no Decreto Municipal 29.142/2026 (5 regiões, 56 bairros oficiais + localidades conhecidas). 'aliases' = termos fortes (nome praticamente único de Floripa). 'fracos' = só contam quando o texto já fala de Florianópolis e o termo aparece como lugar (no/na/bairro/praia...). 'exige_bairro' = obriga 'bairro X', 'X, em Florianópolis' ou similar. 'ignorar' = trechos apagados antes de comparar (ex.: 'centro de saúde'). 'negativos' = se aparecer, a notícia NÃO é desse bairro (ex.: 'Mato Grosso' para Pantanal). Edite à vontade.",
+  "regioes": [
+    {
+      "id": "norte",
+      "nome": "Norte da Ilha",
+      "cor": "#0ea5e9",
+      "palavras": [
+        "norte da ilha",
+        "regiao norte de florianopolis",
+        "norte de florianopolis",
+        "norte da capital"
+      ],
+      "bairros": [
+        {
+          "id": "canasvieiras",
+          "nome": "Canasvieiras",
+          "distrito": "Canasvieiras",
+          "aliases": [
+            "canasvieiras",
+            "praia de canasvieiras"
+          ]
+        },
+        {
+          "id": "jurere",
+          "nome": "Jurerê",
+          "distrito": "Canasvieiras",
+          "aliases": [
+            "jurere",
+            "jurere internacional",
+            "jurere tradicional"
+          ]
+        },
+        {
+          "id": "daniela",
+          "nome": "Daniela",
+          "distrito": "Canasvieiras",
+          "aliases": [
+            "praia da daniela"
+          ],
+          "fracos": [
+            "daniela"
+          ],
+          "exige_bairro": true
+        },
+        {
+          "id": "praia-do-forte",
+          "nome": "Praia do Forte",
+          "distrito": "Canasvieiras",
+          "aliases": [
+            "praia do forte",
+            "forte sao jose da ponta grossa",
+            "fortaleza de sao jose da ponta grossa"
+          ]
+        },
+        {
+          "id": "vargem-pequena",
+          "nome": "Vargem Pequena",
+          "distrito": "Canasvieiras",
+          "aliases": [
+            "vargem pequena"
+          ]
+        },
+        {
+          "id": "cachoeira-do-bom-jesus",
+          "nome": "Cachoeira do Bom Jesus",
+          "distrito": "Cachoeira do Bom Jesus",
+          "aliases": [
+            "cachoeira do bom jesus"
+          ]
+        },
+        {
+          "id": "vargem-do-bom-jesus",
+          "nome": "Vargem do Bom Jesus",
+          "distrito": "Cachoeira do Bom Jesus",
+          "aliases": [
+            "vargem do bom jesus"
+          ]
+        },
+        {
+          "id": "ponta-das-canas",
+          "nome": "Ponta das Canas",
+          "distrito": "Cachoeira do Bom Jesus",
+          "aliases": [
+            "ponta das canas"
+          ]
+        },
+        {
+          "id": "lagoinha",
+          "nome": "Lagoinha",
+          "distrito": "Cachoeira do Bom Jesus",
+          "aliases": [
+            "praia da lagoinha",
+            "lagoinha do norte"
+          ],
+          "fracos": [
+            "lagoinha"
+          ],
+          "ignorar": [
+            "lagoinha do leste"
+          ]
+        },
+        {
+          "id": "praia-brava",
+          "nome": "Praia Brava",
+          "distrito": "Cachoeira do Bom Jesus",
+          "fracos": [
+            "praia brava",
+            "brava"
+          ]
+        },
+        {
+          "id": "ingleses",
+          "nome": "Ingleses",
+          "distrito": "Ingleses",
+          "aliases": [
+            "ingleses do rio vermelho",
+            "praia dos ingleses",
+            "bairro ingleses",
+            "nos ingleses",
+            "dos ingleses"
+          ],
+          "fracos": [
+            "ingleses"
+          ]
+        },
+        {
+          "id": "santinho",
+          "nome": "Santinho",
+          "distrito": "Ingleses",
+          "aliases": [
+            "praia do santinho"
+          ],
+          "fracos": [
+            "santinho"
+          ]
+        },
+        {
+          "id": "capivari",
+          "nome": "Capivari",
+          "distrito": "Ingleses",
+          "fracos": [
+            "capivari"
+          ],
+          "exige_bairro": true
+        },
+        {
+          "id": "vargem-grande",
+          "nome": "Vargem Grande",
+          "distrito": "Ingleses",
+          "aliases": [
+            "vargem grande"
+          ]
+        },
+        {
+          "id": "ratones",
+          "nome": "Ratones",
+          "distrito": "Ratones",
+          "aliases": [
+            "ratones"
+          ]
+        },
+        {
+          "id": "santo-antonio-de-lisboa",
+          "nome": "Santo Antônio de Lisboa",
+          "distrito": "Santo Antônio de Lisboa",
+          "aliases": [
+            "santo antonio de lisboa"
+          ]
+        },
+        {
+          "id": "sambaqui",
+          "nome": "Sambaqui",
+          "distrito": "Santo Antônio de Lisboa",
+          "aliases": [
+            "sambaqui",
+            "barra do sambaqui"
+          ]
+        },
+        {
+          "id": "cacupe",
+          "nome": "Cacupé",
+          "distrito": "Santo Antônio de Lisboa",
+          "aliases": [
+            "cacupe"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "centro",
+      "nome": "Centro",
+      "cor": "#f59e0b",
+      "palavras": [
+        "regiao central de florianopolis",
+        "area central de florianopolis",
+        "centro de florianopolis",
+        "centro da capital",
+        "centro de floripa",
+        "centro historico de florianopolis"
+      ],
+      "bairros": [
+        {
+          "id": "centro-bairro",
+          "nome": "Centro",
+          "distrito": "Sede",
+          "aliases": [
+            "centro de florianopolis",
+            "centro da capital",
+            "centro de floripa",
+            "bairro centro",
+            "centro historico",
+            "mercado publico",
+            "praca xv",
+            "beira-mar norte",
+            "beira mar norte",
+            "avenida beira-mar",
+            "avenida beira mar",
+            "ticen",
+            "terminal cidade de florianopolis",
+            "felipe schmidt",
+            "largo da alfandega",
+            "catedral metropolitana",
+            "ponte hercilio luz",
+            "conselheiro mafra",
+            "mauro ramos",
+            "hospital celso ramos",
+            "rita maria",
+            "rodoviaria de florianopolis",
+            "rua tenente silveira",
+            "praca da bandeira",
+            "alameda adolfo konder",
+            "trapiche da beira-mar",
+            "figueira da praca xv",
+            "prainha",
+            "morro da cruz",
+            "mont serrat",
+            "maciço do morro da cruz",
+            "macico do morro da cruz",
+            "morro do mocoto",
+            "morro do horacio",
+            "morro do 25",
+            "morro da mariquinha",
+            "largo da catedral",
+            "rua bocaiuva",
+            "av. hercilio luz",
+            "avenida hercilio luz"
+          ],
+          "fracos": [
+            "centro"
+          ],
+          "ignorar": [
+            "centro de sao jose",
+            "centro de palhoca",
+            "centro de biguacu",
+            "centro de joinville",
+            "centro de blumenau",
+            "centro de itajai",
+            "centro de chapeco",
+            "centro de criciuma",
+            "centro de lages",
+            "centro de balneario",
+            "centro de tijucas",
+            "centro de santo amaro",
+            "centro de garopaba",
+            "centro de imbituba",
+            "centro de bombinhas",
+            "centro de porto belo",
+            "centro de itapema",
+            "centro espirita",
+            "centro de saude",
+            "centro de referencia",
+            "centro de eventos",
+            "centro de distribuicao",
+            "centro de treinamento",
+            "centro comercial",
+            "centro de atendimento",
+            "centro universitario",
+            "centro cultural",
+            "centro de convencoes",
+            "centro de triagem",
+            "centro cirurgico",
+            "centro de pesquisa",
+            "centro de operacoes",
+            "centro de controle",
+            "centro de educacao",
+            "centro de ensino",
+            "centro de formacao",
+            "centro integrado",
+            "centro socioeducativo",
+            "centro-oeste",
+            "centro de sao paulo",
+            "centro do rio",
+            "centro da cidade de",
+            "centro de curitiba",
+            "centro de porto alegre"
+          ]
+        },
+        {
+          "id": "agronomica",
+          "nome": "Agronômica",
+          "distrito": "Sede",
+          "aliases": [
+            "agronomica",
+            "hospital infantil joana de gusmao",
+            "joana de gusmao",
+            "avenida rubens de arruda ramos",
+            "ponte do imaruim"
+          ]
+        },
+        {
+          "id": "jose-mendes",
+          "nome": "José Mendes",
+          "distrito": "Sede",
+          "aliases": [
+            "jose mendes"
+          ]
+        },
+        {
+          "id": "trindade",
+          "nome": "Trindade",
+          "distrito": "Trindade",
+          "aliases": [
+            "ufsc",
+            "universidade federal de santa catarina",
+            "hospital universitario",
+            "bairro trindade",
+            "na trindade",
+            "da trindade",
+            "praca santos dumont",
+            "rua lauro linhares",
+            "lauro linhares",
+            "rua delfino conti",
+            "estadio da ressacada",
+            "ressacada"
+          ],
+          "fracos": [
+            "trindade"
+          ],
+          "ignorar": [
+            "santissima trindade"
+          ],
+          "negativos": [
+            "trindade do sul",
+            "trindade (go)",
+            "trindade, goias",
+            "trindade go",
+            "trindade e tobago"
+          ]
+        },
+        {
+          "id": "corrego-grande",
+          "nome": "Córrego Grande",
+          "distrito": "Trindade",
+          "aliases": [
+            "corrego grande",
+            "parque sao jorge",
+            "parque ecologico do corrego grande",
+            "sao jorge"
+          ]
+        },
+        {
+          "id": "santa-monica",
+          "nome": "Santa Mônica",
+          "distrito": "Trindade",
+          "aliases": [
+            "santa monica"
+          ],
+          "negativos": [
+            "santa monica, california",
+            "santa monica (eua)"
+          ]
+        },
+        {
+          "id": "itacorubi",
+          "nome": "Itacorubi",
+          "distrito": "Trindade",
+          "aliases": [
+            "itacorubi",
+            "udesc",
+            "cemiterio do itacorubi",
+            "admar gonzaga",
+            "manguezal do itacorubi",
+            "ceasa de florianopolis",
+            "jardim anchieta",
+            "parque sao jorge"
+          ]
+        },
+        {
+          "id": "pantanal",
+          "nome": "Pantanal",
+          "distrito": "Trindade",
+          "aliases": [
+            "bairro pantanal",
+            "pantanal, em florianopolis",
+            "pantanal, florianopolis"
+          ],
+          "fracos": [
+            "pantanal"
+          ],
+          "negativos": [
+            "pantanal mato-grossense",
+            "mato grosso",
+            "mato-grossense",
+            "bioma pantanal",
+            "pantanal (ms)",
+            "pantanal sul-mato-grossense",
+            "queimadas no pantanal",
+            "onca",
+            "jacare"
+          ]
+        },
+        {
+          "id": "carvoeira",
+          "nome": "Carvoeira",
+          "distrito": "Trindade",
+          "aliases": [
+            "carvoeira"
+          ]
+        },
+        {
+          "id": "serrinha",
+          "nome": "Serrinha",
+          "distrito": "Trindade",
+          "fracos": [
+            "serrinha"
+          ],
+          "exige_bairro": true
+        },
+        {
+          "id": "saco-grande",
+          "nome": "Saco Grande",
+          "distrito": "Saco Grande",
+          "aliases": [
+            "saco grande",
+            "sol nascente",
+            "rodovia virgilio varzea",
+            "virgilio varzea",
+            "floripa shopping"
+          ]
+        },
+        {
+          "id": "joao-paulo",
+          "nome": "João Paulo",
+          "distrito": "Saco Grande",
+          "aliases": [
+            "bairro joao paulo",
+            "joao paulo, em florianopolis",
+            "joao paulo, florianopolis",
+            "no joao paulo"
+          ],
+          "exige_bairro": true
+        },
+        {
+          "id": "monte-verde",
+          "nome": "Monte Verde",
+          "distrito": "Saco Grande",
+          "fracos": [
+            "monte verde"
+          ],
+          "negativos": [
+            "monte verde, mg",
+            "monte verde (mg)",
+            "camanducaia"
+          ]
+        },
+        {
+          "id": "saco-dos-limoes",
+          "nome": "Saco dos Limões",
+          "distrito": "Saco dos Limões",
+          "aliases": [
+            "saco dos limoes",
+            "via expressa sul",
+            "morro da caixa",
+            "rua jorge lacerda",
+            "avenida jorge lacerda"
+          ]
+        },
+        {
+          "id": "costeira-do-pirajubae",
+          "nome": "Costeira do Pirajubaé",
+          "distrito": "Saco dos Limões",
+          "aliases": [
+            "costeira do pirajubae",
+            "pirajubae",
+            "costeira, em florianopolis",
+            "bairro costeira",
+            "na costeira"
+          ],
+          "fracos": [
+            "costeira"
+          ],
+          "ignorar": [
+            "costeira do ribeirao"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "continente",
+      "nome": "Continente",
+      "cor": "#8b5cf6",
+      "palavras": [
+        "regiao continental de florianopolis",
+        "parte continental de florianopolis",
+        "continente de florianopolis",
+        "area continental de florianopolis",
+        "continente da capital",
+        "bairros do continente",
+        "no continente"
+      ],
+      "bairros": [
+        {
+          "id": "estreito",
+          "nome": "Estreito",
+          "distrito": "Estreito",
+          "aliases": [
+            "bairro estreito",
+            "no estreito",
+            "do estreito",
+            "estreito, em florianopolis",
+            "rua fulvio aducci",
+            "fulvio aducci",
+            "avenida santa catarina",
+            "ponte colombo salles",
+            "pontes colombo salles",
+            "ponte pedro ivo",
+            "avenida ivo silveira",
+            "ivo silveira",
+            "terminal do estreito",
+            "beira-mar continental",
+            "beira mar continental"
+          ],
+          "fracos": [
+            "estreito"
+          ],
+          "ignorar": [
+            "estreito de "
+          ]
+        },
+        {
+          "id": "balneario",
+          "nome": "Balneário",
+          "distrito": "Estreito",
+          "aliases": [
+            "bairro balneario",
+            "balneario do estreito",
+            "balneario estreito",
+            "ponta do leal",
+            "no balneario, em florianopolis",
+            "balneario, em florianopolis"
+          ],
+          "fracos": [
+            "balneario"
+          ],
+          "ignorar": [
+            "balneario camboriu",
+            "balneario rincao",
+            "balneario picarras",
+            "balneario barra do sul",
+            "balneario gaivota",
+            "balneario arroio do silva",
+            "balneario esplanada",
+            "balneario do rincao",
+            "balnearios"
+          ]
+        },
+        {
+          "id": "canto",
+          "nome": "Canto",
+          "distrito": "Estreito",
+          "aliases": [
+            "bairro canto",
+            "canto, em florianopolis",
+            "canto, no estreito"
+          ],
+          "exige_bairro": true
+        },
+        {
+          "id": "coloninha",
+          "nome": "Coloninha",
+          "distrito": "Estreito",
+          "aliases": [
+            "coloninha"
+          ]
+        },
+        {
+          "id": "jardim-atlantico",
+          "nome": "Jardim Atlântico",
+          "distrito": "Estreito",
+          "fracos": [
+            "jardim atlantico"
+          ]
+        },
+        {
+          "id": "monte-cristo",
+          "nome": "Monte Cristo",
+          "distrito": "Estreito",
+          "aliases": [
+            "bairro monte cristo",
+            "comunidade chico mendes",
+            "novo horizonte, em florianopolis",
+            "promorar",
+            "nova esperanca, em florianopolis",
+            "monte cristo, em florianopolis"
+          ],
+          "fracos": [
+            "monte cristo",
+            "chico mendes",
+            "novo horizonte"
+          ],
+          "ignorar": [
+            "conde de monte cristo",
+            "pousada monte cristo"
+          ]
+        },
+        {
+          "id": "capoeiras",
+          "nome": "Capoeiras",
+          "distrito": "Capoeiras",
+          "aliases": [
+            "capoeiras",
+            "parque de coqueiros",
+            "avenida patricio caldeira de andrade",
+            "terminal de capoeiras",
+            "rua santos saraiva",
+            "santos saraiva",
+            "vila sao joao"
+          ]
+        },
+        {
+          "id": "coqueiros",
+          "nome": "Coqueiros",
+          "distrito": "Capoeiras",
+          "aliases": [
+            "coqueiros",
+            "praia da saudade",
+            "praia do meio",
+            "rua desembargador pedro silva",
+            "desembargador pedro silva",
+            "ponta do coral"
+          ],
+          "ignorar": [
+            "praia dos coqueiros",
+            "coqueiros, em"
+          ]
+        },
+        {
+          "id": "abraao",
+          "nome": "Abraão",
+          "distrito": "Capoeiras",
+          "aliases": [
+            "bairro abraao",
+            "abraao, em florianopolis",
+            "no abraao",
+            "do abraao",
+            "praia do abraao"
+          ],
+          "exige_bairro": true
+        },
+        {
+          "id": "bom-abrigo",
+          "nome": "Bom Abrigo",
+          "distrito": "Capoeiras",
+          "aliases": [
+            "bom abrigo"
+          ]
+        },
+        {
+          "id": "itaguacu",
+          "nome": "Itaguaçu",
+          "distrito": "Capoeiras",
+          "aliases": [
+            "itaguacu"
+          ]
+        },
+        {
+          "id": "sape",
+          "nome": "Sapé",
+          "distrito": "Capoeiras",
+          "fracos": [
+            "sape"
+          ],
+          "exige_bairro": true
+        },
+        {
+          "id": "vila-aparecida",
+          "nome": "Vila Aparecida",
+          "distrito": "Capoeiras",
+          "fracos": [
+            "vila aparecida"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "sul",
+      "nome": "Sul da Ilha",
+      "cor": "#10b981",
+      "palavras": [
+        "sul da ilha",
+        "regiao sul de florianopolis",
+        "sul de florianopolis",
+        "sul da capital",
+        "sul de floripa"
+      ],
+      "bairros": [
+        {
+          "id": "campeche",
+          "nome": "Campeche",
+          "distrito": "Campeche",
+          "aliases": [
+            "campeche",
+            "praia do campeche",
+            "ilha do campeche",
+            "avenida pequeno principe",
+            "pequeno principe",
+            "lagoa pequena",
+            "novo campeche",
+            "areias do campeche",
+            "riozinho do campeche",
+            "avenida campeche"
+          ]
+        },
+        {
+          "id": "rio-tavares",
+          "nome": "Rio Tavares",
+          "distrito": "Campeche",
+          "aliases": [
+            "rio tavares",
+            "fazenda do rio tavares",
+            "rodovia sc-405",
+            "sc-405",
+            "sc 405",
+            "elevado do rio tavares"
+          ]
+        },
+        {
+          "id": "morro-das-pedras",
+          "nome": "Morro das Pedras",
+          "distrito": "Campeche",
+          "aliases": [
+            "morro das pedras",
+            "praia do morro das pedras"
+          ]
+        },
+        {
+          "id": "armacao",
+          "nome": "Armação",
+          "distrito": "Pântano do Sul",
+          "aliases": [
+            "armacao do pantano do sul",
+            "praia da armacao",
+            "matadeiro",
+            "praia do matadeiro",
+            "lagoa do peri",
+            "parque do peri",
+            "sertao do peri",
+            "sertao do ribeirao",
+            "bairro armacao",
+            "na armacao",
+            "da armacao"
+          ],
+          "fracos": [
+            "armacao"
+          ],
+          "ignorar": [
+            "armacao, em penha",
+            "praia da armacao, em penha"
+          ],
+          "negativos": [
+            "armacao de buzios",
+            "armacao dos buzios",
+            "armacao do itapocoroy",
+            "penha"
+          ]
+        },
+        {
+          "id": "pantano-do-sul",
+          "nome": "Pântano do Sul",
+          "distrito": "Pântano do Sul",
+          "aliases": [
+            "pantano do sul",
+            "lagoinha do leste",
+            "costa de dentro",
+            "costa de cima",
+            "praia do pantano do sul",
+            "praia da solidao",
+            "praia do saquinho",
+            "solidao, em florianopolis"
+          ]
+        },
+        {
+          "id": "acores",
+          "nome": "Açores",
+          "distrito": "Pântano do Sul",
+          "aliases": [
+            "praia dos acores",
+            "bairro acores",
+            "acores, em florianopolis",
+            "nos acores"
+          ],
+          "negativos": [
+            "ilhas dos acores",
+            "arquipelago dos acores",
+            "portugal"
+          ]
+        },
+        {
+          "id": "ribeirao-da-ilha",
+          "nome": "Ribeirão da Ilha",
+          "distrito": "Ribeirão da Ilha",
+          "aliases": [
+            "ribeirao da ilha",
+            "freguesia do ribeirao",
+            "costeira do ribeirao",
+            "barro vermelho",
+            "rodovia baldicero filomeno",
+            "baldicero filomeno",
+            "ostras do ribeirao"
+          ]
+        },
+        {
+          "id": "alto-ribeirao",
+          "nome": "Alto Ribeirão",
+          "distrito": "Ribeirão da Ilha",
+          "aliases": [
+            "alto ribeirao"
+          ]
+        },
+        {
+          "id": "caieira-da-barra-do-sul",
+          "nome": "Caieira da Barra do Sul",
+          "distrito": "Ribeirão da Ilha",
+          "aliases": [
+            "caieira da barra do sul",
+            "caieira",
+            "naufragados",
+            "praia de naufragados",
+            "praia dos naufragados"
+          ],
+          "ignorar": [
+            "caieiras"
+          ]
+        },
+        {
+          "id": "tapera",
+          "nome": "Tapera",
+          "distrito": "Tapera da Base",
+          "aliases": [
+            "tapera da base",
+            "bairro tapera",
+            "tapera, em florianopolis",
+            "na tapera",
+            "da tapera"
+          ],
+          "fracos": [
+            "tapera"
+          ]
+        },
+        {
+          "id": "carianos",
+          "nome": "Carianos",
+          "distrito": "Tapera da Base",
+          "aliases": [
+            "carianos",
+            "aeroporto hercilio luz",
+            "aeroporto de florianopolis",
+            "aeroporto internacional de florianopolis",
+            "floripa airport",
+            "base aerea de florianopolis",
+            "base aerea",
+            "rodovia aparicio ramos cordeiro",
+            "aparicio ramos cordeiro"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "leste",
+      "nome": "Leste da Ilha",
+      "cor": "#ec4899",
+      "palavras": [
+        "leste da ilha",
+        "regiao leste de florianopolis",
+        "leste de florianopolis",
+        "leste da capital"
+      ],
+      "bairros": [
+        {
+          "id": "lagoa-da-conceicao",
+          "nome": "Lagoa da Conceição",
+          "distrito": "Lagoa da Conceição",
+          "aliases": [
+            "lagoa da conceicao",
+            "centrinho da lagoa",
+            "avenida das rendeiras",
+            "das rendeiras",
+            "rotula da lagoa",
+            "osni ortiga",
+            "dunas da lagoa",
+            "praia da joaquina",
+            "joaquina",
+            "praia mole",
+            "galheta",
+            "praia da galheta",
+            "canto dos aracas",
+            "canto da lagoa",
+            "retiro da lagoa",
+            "costa da lagoa",
+            "porto da lagoa",
+            "ponte da lagoa",
+            "morro da lagoa",
+            "rua joao pacheco da costa"
+          ],
+          "ignorar": [
+            "conceicao da barra",
+            "nossa senhora da conceicao"
+          ]
+        },
+        {
+          "id": "canto-da-lagoa",
+          "nome": "Canto da Lagoa",
+          "distrito": "Lagoa da Conceição",
+          "aliases": [
+            "canto da lagoa",
+            "canto dos aracas"
+          ]
+        },
+        {
+          "id": "costa-da-lagoa",
+          "nome": "Costa da Lagoa",
+          "distrito": "Lagoa da Conceição",
+          "aliases": [
+            "costa da lagoa"
+          ]
+        },
+        {
+          "id": "joaquina",
+          "nome": "Joaquina",
+          "distrito": "Lagoa da Conceição",
+          "aliases": [
+            "praia da joaquina",
+            "dunas da joaquina"
+          ],
+          "fracos": [
+            "joaquina"
+          ]
+        },
+        {
+          "id": "praia-mole",
+          "nome": "Praia Mole",
+          "distrito": "Lagoa da Conceição",
+          "aliases": [
+            "praia mole",
+            "galheta",
+            "praia da galheta"
+          ]
+        },
+        {
+          "id": "retiro-da-lagoa",
+          "nome": "Retiro da Lagoa",
+          "distrito": "Lagoa da Conceição",
+          "aliases": [
+            "retiro da lagoa"
+          ]
+        },
+        {
+          "id": "porto-da-lagoa",
+          "nome": "Porto da Lagoa",
+          "distrito": "Lagoa da Conceição",
+          "aliases": [
+            "porto da lagoa"
+          ]
+        },
+        {
+          "id": "barra-da-lagoa",
+          "nome": "Barra da Lagoa",
+          "distrito": "Barra da Lagoa",
+          "aliases": [
+            "barra da lagoa",
+            "fortaleza da barra",
+            "canal da barra",
+            "projeto tamar",
+            "ponte pencil"
+          ]
+        },
+        {
+          "id": "rio-vermelho",
+          "nome": "São João do Rio Vermelho",
+          "distrito": "Rio Vermelho",
+          "aliases": [
+            "rio vermelho",
+            "sao joao do rio vermelho",
+            "parque do rio vermelho",
+            "muquem",
+            "travessao",
+            "rodovia joao gualberto soares",
+            "joao gualberto soares"
+          ],
+          "ignorar": [
+            "ingleses do rio vermelho"
+          ],
+          "negativos": [
+            "rio vermelho (ba)",
+            "salvador"
+          ]
+        },
+        {
+          "id": "mocambique",
+          "nome": "Moçambique",
+          "distrito": "Rio Vermelho",
+          "aliases": [
+            "praia do mocambique",
+            "praia grande do mocambique",
+            "praia de mocambique"
+          ],
+          "fracos": [
+            "mocambique"
+          ],
+          "exige_bairro": true
+        }
+      ]
+    }
+  ]
+}
