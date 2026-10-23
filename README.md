@@ -24,6 +24,8 @@ portais (RSS) + Google Notícias (RSS de busca)  →  coletor  →  classificado
    ("no bairro Pantanal", "Estreito, em Florianópolis"). Há listas de vetos ("Mato Grosso" ⇒ não é o Pantanal da Trindade).
    Também reconhece pontos de referência: UFSC ⇒ Trindade, aeroporto ⇒ Carianos, Ponte Hercílio Luz ⇒ Centro, etc.
    Notícias de Florianópolis sem bairro identificado ficam como "gerais de Floripa"; notícias de outras cidades são descartadas.
+   Links do Google Notícias (`news.google.com/rss/articles/...`) são resolvidos para o endereço real do portal
+   antes de salvar (`src/gnews.js`); se não der, o link do Google é mantido. Desligue com `RESOLVER_GNEWS=false`.
 3. **Deduplicação**: mesma URL ou mesmo título vindo de dois caminhos (feed direto + Google Notícias) vira uma notícia só,
    preferindo o link direto do portal.
 4. **App** (`web/`): lê `web/api/noticias.json` e filtra tudo no navegador. Abas por região, chips por bairro com contagem,
@@ -65,9 +67,11 @@ Nesse modo o botão "atualizar" do app dispara uma coleta na hora.
 
 ## Atualizações no celular
 
+- **Copiar link / Compartilhar**: botões em cada notícia. "Copiar link" coloca o endereço da matéria na área de
+  transferência; "Compartilhar" abre o menu do celular (WhatsApp, Instagram, etc.).
 - **Notícias**: puxe a lista para baixo (ou toque no ícone de atualizar). O rodapé mostra a hora da última coleta.
 - **O app em si**: quando uma versão nova é publicada, aparece a faixa "Nova versão do app disponível" com o botão
-  **Atualizar agora**. O número da versão fica no rodapé (`app v1.5`). Ao mudar o app, altere `APP_VERSAO` em
+  **Atualizar agora**. O número da versão fica no rodapé (`app v1.6`). Ao mudar o app, altere `APP_VERSAO` em
   `web/app.js` e `VERSAO` em `web/sw.js` para o mesmo valor.
 
 ## Personalizando

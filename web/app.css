@@ -79,7 +79,12 @@ button { font: inherit; color: inherit; cursor: pointer; }
 @media (min-width: 720px) { .lista { grid-template-columns: 1fr 1fr; } .dia { grid-column: 1 / -1; } }
 .dia { font-size: .8rem; text-transform: uppercase; letter-spacing: .08em; color: var(--texto-2); margin: 10px 2px -2px; font-weight: 700; }
 .card { background: var(--superficie); border: 1px solid var(--borda); border-radius: var(--raio); box-shadow: var(--sombra); overflow: hidden; }
-.card-link { display: flex; flex-direction: column; height: 100%; }
+.card { display: flex; flex-direction: column; }
+.card-link { display: flex; flex-direction: column; flex: 1; }
+.card-acoes { display: flex; gap: 6px; padding: 0 10px 10px; }
+.acao { display: inline-flex; align-items: center; gap: 6px; border: 1px solid var(--borda); background: var(--fundo); color: var(--texto-2); border-radius: 999px; padding: 6px 12px; font-size: .82rem; font-weight: 600; }
+.acao:active { transform: scale(.97); }
+.acao.ok { border-color: var(--sul); color: var(--sul); }
 .card-link:hover .titulo { color: var(--primaria); }
 .card-img { aspect-ratio: 16 / 8; background: var(--superficie-2); overflow: hidden; }
 .card-img img { width: 100%; height: 100%; object-fit: cover; display: block; }

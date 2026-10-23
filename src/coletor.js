@@ -12,6 +12,7 @@ const path = require('node:path');
 const { parseFeed } = require('./rss');
 const { classificar, resumoConfig } = require('./classificar');
 const { classificarAssuntos, listaAssuntos } = require('./assuntos');
+const { resolverUrl } = require('./gnews');
 const { abrir } = require('./db');
 const { hash, normalizarUrl, chaveTitulo, agoraIso, normalizar } = require('./util');
 
@@ -25,6 +26,7 @@ const CONFIG = {
   timeoutMs: Number(process.env.TIMEOUT_MS || 20000),
   concorrencia: Number(process.env.CONCORRENCIA || 4),
   gnewsBairros: (process.env.GNEWS_BAIRROS || 'true') !== 'false',
+  resolverGnews: (process.env.RESOLVER_GNEWS || 'true') !== 'false',
   falhasParaPausar: 8,
 };
 const USER_AGENT = 'Mozilla/5.0 (compatible; NoticiasFloripaBairros/1.0; +https://github.com/maiconcombatoficial/Noticiasjornaisbairros)';
@@ -93,7 +95,9 @@ function montarFontes(db, fontesCfg, bairrosCfg) {
 
 function montarNoticia(item, fonte, cls, assuntos = []) {
   const viaGnews = fonte.tipo === 'gnews' || /news\.google\./i.test(item.link);
-  const url = viaGnews ? item.link : normalizarUrl(item.link);
+  // Link do Google já resolvido para o portal: passa a valer como link direto (inclusive na deduplicação)
+  const linkDireto = item.linkResolvido ? normalizarUrl(item.linkResolvido) : null;
+  const url = linkDireto || (viaGnews ? item.link : normalizarUrl(item.link));
   let titulo = item.titulo;
   let fonteNome = fonte.nome;
   // Itens vindos do Google Notícias chegam como "Título - Nome do Portal" e trazem <source>
@@ -107,7 +111,7 @@ function montarNoticia(item, fonte, cls, assuntos = []) {
   }
   const resumo = viaGnews ? '' : (item.resumo || '').slice(0, 400);
   return {
-    id: hash(viaGnews ? chaveTitulo(titulo) + '|gnews' : url),
+    id: hash(viaGnews && !linkDireto ? chaveTitulo(titulo) + '|gnews' : url),
     url,
     titulo,
     titulo_chave: chaveTitulo(titulo),
@@ -115,7 +119,7 @@ function montarNoticia(item, fonte, cls, assuntos = []) {
     imagem: item.imagem || '',
     fonte_id: fonte.id,
     fonte_nome: fonteNome,
-    via_gnews: viaGnews ? 1 : 0,
+    via_gnews: viaGnews && !linkDireto ? 1 : 0,
     publicado_em: item.data || agoraIso(),
     coletado_em: agoraIso(),
     regioes: JSON.stringify(cls.regioes),
@@ -138,12 +142,22 @@ async function coletarFonte(db, fonte, bairrosCfg, log, exclusoes = []) {
     const xml = await baixar(url, CONFIG.timeoutMs);
     const feed = parseFeed(xml);
     resultado.itens = feed.itens.length;
+    const candidatos = [];
+    for (const item of feed.itens) {
+      const tituloNorm = normalizar(item.titulo);
+      if (exclusoes.some((re) => re.test(tituloNorm))) { resultado.descartadas++; continue; }
+      const cls = classificar({ titulo: item.titulo, resumo: item.resumo, conteudo: item.conteudo }, fonte, bairrosCfg);
+      if (!cls.floripa) { resultado.descartadas++; continue; }
+      candidatos.push({ item, cls });
+    }
+    // Links do Google Notícias: resolve para a URL do portal só nas notícias ainda não conhecidas
+    if (CONFIG.resolverGnews) {
+      const pendentes = candidatos.filter(({ item, cls }) => /news\.google\./i.test(item.link) && !db.jaConhecida(montarNoticia(item, fonte, cls)));
+      await emParalelo(pendentes, 3, async (c) => { c.item.linkResolvido = await resolverUrl(c.item.link, { timeoutMs: CONFIG.timeoutMs }); });
+      resultado.resolvidas = pendentes.filter((c) => c.item.linkResolvido).length;
+    }
     db.transacao(() => {
-      for (const item of feed.itens) {
-        const tituloNorm = normalizar(item.titulo);
-        if (exclusoes.some((re) => re.test(tituloNorm))) { resultado.descartadas++; continue; }
-        const cls = classificar({ titulo: item.titulo, resumo: item.resumo, conteudo: item.conteudo }, fonte, bairrosCfg);
-        if (!cls.floripa) { resultado.descartadas++; continue; }
+      for (const { item, cls } of candidatos) {
         const assuntos = classificarAssuntos({ titulo: item.titulo, resumo: item.resumo, conteudo: item.conteudo });
         const n = montarNoticia(item, fonte, cls, assuntos);
         const r = db.inserirNoticia(n);
@@ -155,7 +169,7 @@ async function coletarFonte(db, fonte, bairrosCfg, log, exclusoes = []) {
       ultimo_ok: agoraIso(), ultimo_erro: anterior.ultimo_erro || null, erro: null, falhas_seguidas: 0,
       total_itens: (anterior.total_itens || 0) + resultado.novas, itens_ultima: resultado.itens, novos_ultima: resultado.novas, ultima_coleta: agoraIso(),
     });
-    log(`✓ ${fonte.nome}: ${resultado.itens} itens, ${resultado.novas} novas, ${resultado.descartadas} fora de Floripa`);
+    log(`✓ ${fonte.nome}: ${resultado.itens} itens, ${resultado.novas} novas, ${resultado.descartadas} fora de Floripa${resultado.resolvidas ? `, ${resultado.resolvidas} links resolvidos` : ''}`);
   } catch (e) {
     resultado.erro = e.name === 'AbortError' ? 'tempo esgotado' : (e.cause && e.cause.code) || e.message;
     db.salvarStatus({

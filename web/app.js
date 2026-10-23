@@ -10,7 +10,7 @@
     dlg: $('#dlg-fontes'), fecharFontes: $('#fechar-fontes'), listaFontes: $('#lista-fontes'), tpl: $('#tpl-card'),
     puxar: $('#puxar'), puxarTexto: $('.puxar-texto'), avisoVersao: $('#aviso-versao'), btnVersao: $('#btn-versao'), toast: $('#toast'), versao: $('#versao'),
   };
-  const APP_VERSAO = '1.5';
+  const APP_VERSAO = '1.6';
   const PAGINA = 40;
   const estado = { regiao: 'todas', bairro: '', assunto: '', q: '', horas: 72, incluirGeral: true, pagina: 1 };
   let dados = { noticias: [], contagem: { regioes: {}, bairros: {} } };
@@ -203,9 +203,31 @@
   el.fecharEscolha.addEventListener('click', () => el.dlgEscolha.close());
   el.dlgEscolha.addEventListener('click', (e) => { if (e.target === el.dlgEscolha) el.dlgEscolha.close(); });
 
+  async function copiarTexto(texto) {
+    try { await navigator.clipboard.writeText(texto); return true; } catch { /* sem permissão: usa o método antigo */ }
+    try {
+      const ta = document.createElement('textarea'); ta.value = texto; ta.setAttribute('readonly', ''); ta.style.position = 'fixed'; ta.style.opacity = '0';
+      document.body.appendChild(ta); ta.select(); const ok = document.execCommand('copy'); ta.remove(); return ok;
+    } catch { return false; }
+  }
   function card(n) {
     const frag = el.tpl.content.cloneNode(true);
     const a = $('.card-link', frag); a.href = n.url;
+    const btCopiar = $('.copiar', frag);
+    btCopiar.onclick = async (e) => {
+      e.preventDefault(); e.stopPropagation();
+      const ok = await copiarTexto(n.url);
+      toast(ok ? 'Link copiado' : 'Não consegui copiar; segure o título para copiar o link');
+      if (ok) { btCopiar.classList.add('ok'); btCopiar.lastChild.textContent = ' Copiado'; setTimeout(() => { btCopiar.classList.remove('ok'); btCopiar.lastChild.textContent = ' Copiar link'; }, 1800); }
+    };
+    const btCompartilhar = $('.compartilhar', frag);
+    if (navigator.share) {
+      btCompartilhar.hidden = false;
+      btCompartilhar.onclick = async (e) => {
+        e.preventDefault(); e.stopPropagation();
+        try { await navigator.share({ title: n.titulo, text: `${n.titulo} (${n.fonte})`, url: n.url }); } catch { /* cancelado */ }
+      };
+    }
     if (n.imagem) { const w = $('.card-img', frag); w.hidden = false; const img = $('img', w); img.src = n.imagem; img.onerror = () => { w.hidden = true; }; }
     $('.fonte', frag).textContent = n.fonte || 'Fonte';
     const t = $('time', frag); t.dateTime = n.publicado_em; t.textContent = tempoRelativo(n.publicado_em);

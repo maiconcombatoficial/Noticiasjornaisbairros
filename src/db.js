@@ -73,6 +73,10 @@ function abrir(caminho) {
      * Insere com deduplicação por URL e por título.
      * @returns {'nova'|'duplicada'|'substituiu'}
      */
+    /** Já existe uma notícia com esta URL ou este título? */
+    jaConhecida(n) {
+      return !!(st.porId.get(n.id) || st.porTitulo.get(n.titulo_chave));
+    },
     inserirNoticia(n) {
       if (st.porId.get(n.id)) return 'duplicada';
       const mesmoTitulo = st.porTitulo.get(n.titulo_chave);
