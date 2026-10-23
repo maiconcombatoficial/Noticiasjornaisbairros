@@ -115,9 +115,14 @@ mark { background: color-mix(in srgb, var(--centro) 35%, transparent); color: in
 
 /* puxar para atualizar */
 body { overscroll-behavior-y: contain; }
-.puxar { position: fixed; top: 0; left: 0; right: 0; z-index: 20; display: flex; justify-content: center; align-items: center; gap: 8px; height: 56px; margin-top: -56px; color: var(--texto-2); font-size: .9rem; pointer-events: none; transition: transform .2s ease, opacity .2s; opacity: 0; }
+.puxar { position: fixed; top: 0; left: 0; right: 0; z-index: 20; display: flex; justify-content: center; align-items: flex-end; height: 56px; margin-top: -56px; pointer-events: none; transition: transform .2s ease, opacity .2s; opacity: 0; }
+.puxar > span { display: inline-flex; align-items: center; gap: 8px; position: relative; }
+.puxar .puxar-texto { background: var(--superficie); color: var(--texto); border: 1px solid var(--borda); box-shadow: var(--sombra); border-radius: 999px; padding: 8px 16px 8px 36px; font-size: .9rem; font-weight: 600; position: relative; }
+.puxar .puxar-icone { position: absolute; left: 14px; z-index: 1; color: var(--primaria); margin-left: 0; }
+.puxar.pronto .puxar-texto, .puxar.carregando .puxar-texto { border-color: var(--primaria); }
 .puxar.visivel { opacity: 1; }
 .puxar-icone { display: inline-block; transition: transform .2s; font-weight: 700; }
+.puxar { position: fixed; }
 .puxar.pronto .puxar-icone { transform: rotate(180deg); }
 .puxar.carregando .puxar-icone { animation: girar 1s linear infinite; }
 .aviso-versao { position: sticky; top: 0; z-index: 30; display: flex; align-items: center; justify-content: center; gap: 12px; padding: 10px 16px; background: var(--primaria); color: var(--primaria-texto); font-size: .9rem; }
