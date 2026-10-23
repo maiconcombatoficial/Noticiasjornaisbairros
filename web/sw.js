@@ -1,10 +1,10 @@
-/* Service worker: casca do app em cache (funciona offline), notícias sempre da rede quando possível. */
-const VERSAO = 'fpb-v1.16'; // mantenha igual a APP_VERSAO em app.js ao publicar mudanças no app
+/* Service worker: casca do app sempre da rede quando houver conexão (assim o código novo vale na hora);
+   cache só como reserva para funcionar offline. */
+const VERSAO = 'fpb-v1.17'; // mantenha igual a APP_VERSAO em app.js ao publicar mudanças no app
 const CASCA = ['./', './index.html', './app.css', './app.js', './manifest.webmanifest', './icons/icone.svg'];
 
 self.addEventListener('install', (e) => {
-  // Não ativa sozinho: o app mostra "Nova versão disponível" e ativa quando a pessoa tocar em Atualizar
-  e.waitUntil(caches.open(VERSAO).then((c) => c.addAll(CASCA)));
+  e.waitUntil(caches.open(VERSAO).then((c) => c.addAll(CASCA.map((u) => new Request(u, { cache: 'reload' })))).then(() => self.skipWaiting()));
 });
 self.addEventListener('activate', (e) => {
   e.waitUntil(caches.keys().then((ks) => Promise.all(ks.filter((k) => k !== VERSAO).map((k) => caches.delete(k)))).then(() => self.clients.claim()));
@@ -15,13 +15,11 @@ self.addEventListener('message', (e) => {
 self.addEventListener('fetch', (e) => {
   const url = new URL(e.request.url);
   if (e.request.method !== 'GET' || url.origin !== location.origin) return;
-  if (url.pathname.includes('/api/')) {
-    // rede primeiro; se falhar (offline), usa a última cópia
-    e.respondWith(fetch(e.request).then((r) => { const copia = r.clone(); caches.open(VERSAO).then((c) => c.put(url.pathname, copia)); return r; }).catch(() => caches.match(url.pathname)));
-    return;
-  }
-  e.respondWith(caches.match(e.request, { ignoreSearch: true }).then((hit) => {
-    const rede = fetch(e.request).then((r) => { if (r.ok) caches.open(VERSAO).then((c) => c.put(e.request, r.clone())); return r; }).catch(() => hit);
-    return hit || rede;
-  }));
+  const chave = url.pathname.includes('/api/') ? url.pathname : e.request;
+  // rede primeiro (sem cache HTTP); se falhar (offline), usa a última cópia
+  e.respondWith(
+    fetch(e.request, { cache: 'no-store' })
+      .then((r) => { if (r.ok) { const copia = r.clone(); caches.open(VERSAO).then((c) => c.put(chave, copia)); } return r; })
+      .catch(() => caches.match(chave, { ignoreSearch: true }))
+  );
 });

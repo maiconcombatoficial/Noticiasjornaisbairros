@@ -91,8 +91,8 @@ Nesse modo o botão "atualizar" do app dispara uma coleta na hora.
 - **Arquivar**: arraste a notícia para a esquerda (ou toque em "Arquivar"). Ela some da lista e vai para "Arquivadas",
   onde pode ser restaurada arrastando para a direita. A lista fica salva só no aparelho.
 - **Notícias**: puxe a lista para baixo (ou toque no ícone de atualizar). O rodapé mostra a hora da última coleta.
-- **O app em si**: quando uma versão nova é publicada, aparece a faixa "Nova versão do app disponível" com o botão
-  **Atualizar agora**. O número da versão fica no rodapé (`app v1.16`). Ao mudar o app, altere `APP_VERSAO` em
+- **O app em si**: atualiza sozinho. Ao abrir (ou voltar para) o app, ele busca o código novo e recarrega uma vez;
+  a faixa "Nova versão do app disponível" só aparece de relance. O número da versão fica no rodapé (`app v1.17`). Ao mudar o app, altere `APP_VERSAO` em
   `web/app.js` e `VERSAO` em `web/sw.js` para o mesmo valor.
 
 ## Senha de acesso (proteção simples)

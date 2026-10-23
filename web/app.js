@@ -11,7 +11,7 @@
     puxar: $('#puxar'), puxarTexto: $('.puxar-texto'), avisoVersao: $('#aviso-versao'), btnVersao: $('#btn-versao'), toast: $('#toast'), versao: $('#versao'),
     toastTexto: $('#toast-texto'), toastAcao: $('#toast-acao'), btnArquivadas: $('#btn-arquivadas'), btnLerDepois: $('#btn-lerdepois'), btnPautas: $('#btn-pautas'), btnAgenda: $('#btn-agenda'), subAgenda: $('#sub-agenda'), selFormato: $('#sel-formato'), selTema: $('#sel-tema'),
   };
-  const APP_VERSAO = '1.16';
+  const APP_VERSAO = '1.17';
   const PAGINA = 40;
   const estado = { regiao: 'todas', bairro: '', assunto: '', q: '', horas: 72, incluirGeral: true, pagina: 1, visao: 'normal', pauta: false, agenda: false, formato: '', tema: '' };
   let dados = { noticias: [], contagem: { regioes: {}, bairros: {} } };
@@ -300,7 +300,6 @@
     else { esquerda = acaoArquivar; direita = acaoSalvar; }
     $('span', btArquivar).textContent = estado.visao === 'arquivadas' ? 'Restaurar' : 'Arquivar';
     $('span', btLerDepois).textContent = estado.visao === 'lerdepois' ? 'Devolver' : 'Ler depois';
-    btLerDepois.classList.toggle('salvo', salvo);
     function executar(acao, direcao) {
       if (acao.semSumir) { movel.classList.add('animando'); movel.style.transform = ''; acao.executar(); setTimeout(render, 150); return; }
       movel.classList.add('animando');
@@ -310,27 +309,47 @@
     btArquivar.onclick = (e) => { e.preventDefault(); e.stopPropagation(); executar(estado.visao === 'arquivadas' ? acaoRestaurar : acaoArquivar, estado.visao === 'arquivadas' ? 1 : -1); };
     btLerDepois.onclick = (e) => { e.preventDefault(); e.stopPropagation(); executar(estado.visao === 'lerdepois' ? acaoRemover : acaoSalvar, 1); };
     // arrastar para os lados (celular)
-    let x0 = null, y0 = null, dx = 0, modo = null;
-    artigo.addEventListener('touchstart', (e) => { if (e.touches.length !== 1) return; x0 = e.touches[0].clientX; y0 = e.touches[0].clientY; dx = 0; modo = null; movel.classList.remove('animando'); }, { passive: true });
+    let x0 = null, y0 = null, dx = 0, modo = null, passou = false, ultimoX = 0, ultimoT = 0, vel = 0;
+    const limiar = () => Math.min(90, artigo.offsetWidth * 0.25);
+    artigo.addEventListener('touchstart', (e) => {
+      if (e.touches.length !== 1) return;
+      x0 = ultimoX = e.touches[0].clientX; y0 = e.touches[0].clientY; ultimoT = performance.now();
+      dx = 0; vel = 0; modo = null; passou = false; movel.classList.remove('animando');
+    }, { passive: true });
     artigo.addEventListener('touchmove', (e) => {
       if (x0 === null) return;
-      const mx = e.touches[0].clientX - x0, my = e.touches[0].clientY - y0;
-      if (!modo) { if (Math.abs(mx) < 8 && Math.abs(my) < 8) return; modo = Math.abs(mx) > Math.abs(my) * 1.3 ? 'h' : 'v'; }
+      const x = e.touches[0].clientX, agora = performance.now();
+      const mx = x - x0, my = e.touches[0].clientY - y0;
+      // decide o sentido do gesto: horizontal ganha empates (antes exigia 30% a mais, e gestos levemente inclinados falhavam)
+      if (!modo) { if (Math.abs(mx) < 10 && Math.abs(my) < 10) return; modo = Math.abs(mx) >= Math.abs(my) ? 'h' : 'v'; }
       if (modo !== 'h') return;
+      if (agora > ultimoT) vel = (x - ultimoX) / (agora - ultimoT);
+      ultimoX = x; ultimoT = agora;
       const acao = mx < 0 ? esquerda : direita;
       dx = acao ? mx : mx * 0.15; // sem ação daquele lado, quase não anda
-      if (acao) { fundo.textContent = acao.rotulo; fundo.style.background = acao.cor; fundo.style.justifyContent = mx < 0 ? 'flex-end' : 'flex-start'; }
+      if (acao) {
+        const pronto = Math.abs(dx) >= limiar();
+        fundo.textContent = pronto ? `✓ ${acao.rotulo}` : acao.rotulo;
+        fundo.style.background = acao.cor; fundo.style.opacity = pronto ? '1' : '0.75';
+        fundo.style.justifyContent = mx < 0 ? 'flex-end' : 'flex-start';
+        if (pronto && !passou && navigator.vibrate) { try { navigator.vibrate(10); } catch { /* */ } }
+        passou = pronto;
+      }
       movel.style.transform = `translateX(${dx}px)`;
     }, { passive: true });
     const soltar = () => {
       if (x0 === null) return;
-      const limiar = Math.min(120, artigo.offsetWidth * 0.35);
       const acao = dx < 0 ? esquerda : direita;
-      if (modo === 'h' && acao && Math.abs(dx) >= limiar) executar(acao, dx < 0 ? -1 : 1);
+      const rapido = Math.abs(vel) > 0.6 && Math.abs(dx) > 40 && Math.sign(vel) === Math.sign(dx); // toque rápido para o lado
+      if (modo === 'h' && acao && (Math.abs(dx) >= limiar() || rapido)) executar(acao, dx < 0 ? -1 : 1);
       else { movel.classList.add('animando'); movel.style.transform = ''; }
+      if (modo === 'h') { arrastou = true; setTimeout(() => { arrastou = false; }, 400); }
       x0 = y0 = null; modo = null;
     };
     artigo.addEventListener('touchend', soltar, { passive: true });
+    // depois de um arrasto, não abre a matéria por engano
+    let arrastou = false;
+    $('.card-link', artigo).addEventListener('click', (e) => { if (arrastou) { e.preventDefault(); e.stopPropagation(); } });
     artigo.addEventListener('touchcancel', soltar, { passive: true });
     const btCompartilhar = $('.compartilhar', frag);
     if (navigator.share) {
@@ -605,17 +624,19 @@
   setInterval(() => { if (!document.hidden) carregar(); }, 15 * 60e3);
 
   // ---------- nova versão do app ----------
+  // O service worker novo se ativa sozinho; a página recarrega uma vez para usar o código novo.
   let registro = null;
   let recarregando = false;
   function mostrarAvisoVersao(sw) {
     el.avisoVersao.hidden = false;
     el.btnVersao.onclick = () => { el.btnVersao.textContent = 'Atualizando…'; sw.postMessage({ tipo: 'ATIVAR' }); };
+    sw.postMessage({ tipo: 'ATIVAR' }); // ativa sem esperar o toque
   }
   function verificarNovaVersao() {
     if (registro) registro.update().catch(() => {});
   }
   if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
-    navigator.serviceWorker.register('sw.js').then((reg) => {
+    navigator.serviceWorker.register('sw.js', { updateViaCache: 'none' }).then((reg) => {
       registro = reg;
       if (reg.waiting && navigator.serviceWorker.controller) mostrarAvisoVersao(reg.waiting);
       reg.addEventListener('updatefound', () => {
@@ -625,7 +646,8 @@
           if (novo.state === 'installed' && navigator.serviceWorker.controller) mostrarAvisoVersao(novo);
         });
       });
-      setInterval(verificarNovaVersao, 30 * 60e3);
+      verificarNovaVersao();
+      setInterval(verificarNovaVersao, 15 * 60e3);
     }).catch(() => {});
     navigator.serviceWorker.addEventListener('controllerchange', () => {
       if (recarregando) return; recarregando = true; location.reload();
