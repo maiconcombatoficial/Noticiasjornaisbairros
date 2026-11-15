@@ -1,6 +1,6 @@
 /* Service worker: casca do app sempre da rede quando houver conexão (assim o código novo vale na hora);
    cache só como reserva para funcionar offline. */
-const VERSAO = 'fpb-v1.19'; // mantenha igual a APP_VERSAO em app.js ao publicar mudanças no app
+const VERSAO = 'fpb-v1.20'; // mantenha igual a APP_VERSAO em app.js ao publicar mudanças no app
 const CASCA = ['./', './index.html', './app.css', './app.js', './manifest.webmanifest', './icons/icone.svg'];
 
 self.addEventListener('install', (e) => {

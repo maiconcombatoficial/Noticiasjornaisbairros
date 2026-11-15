@@ -11,7 +11,7 @@
     puxar: $('#puxar'), puxarTexto: $('.puxar-texto'), avisoVersao: $('#aviso-versao'), btnVersao: $('#btn-versao'), toast: $('#toast'), versao: $('#versao'),
     toastTexto: $('#toast-texto'), toastAcao: $('#toast-acao'), btnArquivadas: $('#btn-arquivadas'), btnLerDepois: $('#btn-lerdepois'), btnLote: $('#btn-lote'), barraLote: $('#barra-lote'), barraLoteBotoes: $('#barra-lote-botoes'), btnPautas: $('#btn-pautas'), btnAgenda: $('#btn-agenda'), subAgenda: $('#sub-agenda'), selFormato: $('#sel-formato'), selTema: $('#sel-tema'),
   };
-  const APP_VERSAO = '1.19';
+  const APP_VERSAO = '1.20';
   const PAGINA = 40;
   // Botão "Gerar carrossel": abre o WhatsApp do ORBIS com o pedido já escrito (padrão Maicon Combat)
   const CARROSSEL_WHATSAPP = '5548996102910'; // +55 48 99610-2910
@@ -312,7 +312,7 @@
       }, 300);
     });
     const btLote = $('.addlote', frag);
-    $('span', btLote).textContent = estado.visao === 'lote' ? '↩ Tirar do lote' : '➕ Lote';
+    $('span', btLote).textContent = estado.visao === 'lote' ? '↩ Tirar do Carrossel em Lote' : '➕ Carrossel em Lote';
     btLote.onclick = (e) => {
       e.preventDefault(); e.stopPropagation();
       if (estado.visao === 'lote') executar(acaoTirarLote, 1);
@@ -335,8 +335,8 @@
     const acaoRestaurar = { rotulo: 'Restaurar', cor: '#10b981', executar: () => { arquivadas.remover(n); toast('Notícia restaurada'); } };
     const acaoSalvar = { rotulo: 'Ler depois', cor: '#0b5fff', executar: () => { lerDepois.adicionar(n); toast('Guardada em Ler depois', 4000, { rotulo: 'Desfazer', ao: () => { lerDepois.remover(n); render(); } }); } };
     const acaoRemover = { rotulo: 'Devolver', cor: '#64748b', executar: () => { lerDepois.remover(n); toast('Devolvida à lista principal', 4000, { rotulo: 'Desfazer', ao: () => { lerDepois.adicionar(n); render(); } }); } };
-    const acaoLote = { rotulo: 'Lote', cor: '#ca8a04', executar: () => { lote.adicionar(n); toast('Separada para o lote', 4000, { rotulo: 'Desfazer', ao: () => { lote.remover(n); render(); } }); } };
-    const acaoTirarLote = { rotulo: 'Tirar do lote', cor: '#64748b', executar: () => { lote.remover(n); toast('Devolvida à lista principal', 4000, { rotulo: 'Desfazer', ao: () => { lote.adicionar(n); render(); } }); } };
+    const acaoLote = { rotulo: 'Carrossel em Lote', cor: '#ca8a04', executar: () => { lote.adicionar(n); toast('Separada para o Carrossel em Lote', 4000, { rotulo: 'Desfazer', ao: () => { lote.remover(n); render(); } }); } };
+    const acaoTirarLote = { rotulo: 'Tirar do Carrossel em Lote', cor: '#64748b', executar: () => { lote.remover(n); toast('Devolvida à lista principal', 4000, { rotulo: 'Desfazer', ao: () => { lote.adicionar(n); render(); } }); } };
     let esquerda = null, direita = null;
     if (estado.visao === 'lote') { esquerda = acaoArquivar; direita = acaoTirarLote; }
     else if (estado.visao === 'arquivadas') { direita = acaoRestaurar; }
@@ -488,7 +488,7 @@
     el.mais.hidden = mostrar.length >= itens.length;
     if (!itens.length) {
       el.vazioDica.textContent = estado.visao === 'lote'
-        ? 'Toque em "➕ Lote" nas notícias para separá-las aqui. Depois envie todas de uma vez ao ORBIS.'
+        ? 'Toque em "➕ Carrossel em Lote" nas notícias para separá-las aqui. Depois envie todas de uma vez ao ORBIS.'
         : estado.visao === 'arquivadas'
         ? 'Arraste uma notícia para a esquerda (ou toque em Arquivar) para guardá-la aqui.'
         : estado.visao === 'lerdepois'
@@ -510,7 +510,7 @@
       const grupo = itens.slice(p * LOTE_POR_MENSAGEM, (p + 1) * LOTE_POR_MENSAGEM);
       const a = document.createElement('a');
       a.href = linkCarrosselLote(grupo, p + 1, partes); a.target = '_blank'; a.rel = 'noopener';
-      a.textContent = partes > 1 ? `📤 Enviar parte ${p + 1} de ${partes} (${grupo.length})` : `📤 Enviar lote ao ORBIS (${grupo.length})`;
+      a.textContent = partes > 1 ? `📤 Enviar parte ${p + 1} de ${partes} (${grupo.length})` : `📤 Enviar Carrossel em Lote ao ORBIS (${grupo.length})`;
       a.addEventListener('click', () => {
         // enviadas: saem do lote e vão para Arquivadas
         setTimeout(() => {
@@ -526,7 +526,7 @@
     const limpar = document.createElement('button'); limpar.type = 'button'; limpar.textContent = 'Devolver todas';
     limpar.onclick = () => {
       for (const n of itens) lote.remover(n);
-      toast('Lote esvaziado; matérias devolvidas à lista', 5000, { rotulo: 'Desfazer', ao: () => { for (const n of itens) lote.adicionar(n); render(); } });
+      toast('Carrossel em Lote esvaziado; matérias devolvidas à lista', 5000, { rotulo: 'Desfazer', ao: () => { for (const n of itens) lote.adicionar(n); render(); } });
       render();
     };
     el.barraLoteBotoes.appendChild(limpar);
@@ -557,7 +557,7 @@
     const itens = filtrar();
     const onde = estado.bairro ? mapaBairro.get(estado.bairro)?.nome : estado.regiao === 'todas' ? 'Florianópolis' : mapaRegiao.get(estado.regiao)?.nome;
     const assuntoNome = estado.assunto ? mapaAssunto.get(estado.assunto)?.nome : '';
-    el.contagem.textContent = `${itens.length} ${itens.length === 1 ? 'notícia' : 'notícias'}${estado.visao === 'arquivadas' ? (itens.length === 1 ? ' arquivada' : ' arquivadas') : estado.visao === 'lerdepois' ? ' para ler depois' : estado.visao === 'lote' ? (itens.length === 1 ? ' no lote de carrosséis' : ' no lote de carrosséis') : ''}${estado.visao === 'lote' ? '' : ` · ${onde}`}${estado.pauta ? ' · Pautas da comunidade' : ''}${estado.agenda ? ' · Cursos e eventos' : ''}${estado.agenda && estado.formato ? ` · ${mapaAgenda.get(estado.formato)?.nome}` : ''}${estado.agenda && estado.tema ? ` · ${mapaTema.get(estado.tema)?.nome}` : ''}${assuntoNome ? ` · ${assuntoNome}` : ''}${estado.q ? ` · “${estado.q}”` : ''}`;
+    el.contagem.textContent = `${itens.length} ${itens.length === 1 ? 'notícia' : 'notícias'}${estado.visao === 'arquivadas' ? (itens.length === 1 ? ' arquivada' : ' arquivadas') : estado.visao === 'lerdepois' ? ' para ler depois' : estado.visao === 'lote' ? ' no Carrossel em Lote' : ''}${estado.visao === 'lote' ? '' : ` · ${onde}`}${estado.pauta ? ' · Pautas da comunidade' : ''}${estado.agenda ? ' · Cursos e eventos' : ''}${estado.agenda && estado.formato ? ` · ${mapaAgenda.get(estado.formato)?.nome}` : ''}${estado.agenda && estado.tema ? ` · ${mapaTema.get(estado.tema)?.nome}` : ''}${assuntoNome ? ` · ${assuntoNome}` : ''}${estado.q ? ` · “${estado.q}”` : ''}`;
     renderLista(itens);
   }
   let toastTimer;
