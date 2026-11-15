@@ -87,6 +87,10 @@ Nesse modo o botão "atualizar" do app dispara uma coleta na hora.
 - **🎨 Gerar carrossel**: abre o WhatsApp do ORBIS (+55 48 99610-2910) com o pedido de carrossel no padrão
   Maicon Combat, já com o título e o link da matéria; é só apertar enviar. O número fica em `CARROSSEL_WHATSAPP`,
   no início de `web/app.js`.
+- **🎨 Lote de carrosséis**: o botão "➕ Lote" de cada notícia a tira da lista principal e a guarda na aba
+  "🎨 Lote". Lá, "📤 Enviar lote ao ORBIS" manda todas numa única mensagem numerada (até 8 por mensagem; acima
+  disso o envio é dividido em partes). Enviadas, as matérias vão para Arquivadas, com Desfazer. Também dá para
+  enviar uma por uma pelo botão amarelo de cada notícia.
 - **Copiar link / Compartilhar**: botões em cada notícia. "Copiar link" coloca o endereço da matéria na área de
   transferência; "Compartilhar" abre o menu do celular (WhatsApp, Instagram, etc.).
 - **Ler depois**: arraste a notícia para a direita (ou toque em "Ler depois"). Ela sai da lista principal e vai para
@@ -95,7 +99,7 @@ Nesse modo o botão "atualizar" do app dispara uma coleta na hora.
   onde pode ser restaurada arrastando para a direita. A lista fica salva só no aparelho.
 - **Notícias**: puxe a lista para baixo (ou toque no ícone de atualizar). O rodapé mostra a hora da última coleta.
 - **O app em si**: atualiza sozinho. Ao abrir (ou voltar para) o app, ele busca o código novo e recarrega uma vez;
-  a faixa "Nova versão do app disponível" só aparece de relance. O número da versão fica no rodapé (`app v1.18`). Ao mudar o app, altere `APP_VERSAO` em
+  a faixa "Nova versão do app disponível" só aparece de relance. O número da versão fica no rodapé (`app v1.19`). Ao mudar o app, altere `APP_VERSAO` em
   `web/app.js` e `VERSAO` em `web/sw.js` para o mesmo valor.
 
 ## Senha de acesso (proteção simples)

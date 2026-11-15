@@ -67,12 +67,17 @@
     <label class="alternar" id="rotulo-geral"><input type="checkbox" id="incluir-geral" checked> <span>Incluir notícias gerais de Floripa</span></label>
     <button class="btn-pautas" id="btn-pautas" type="button" title="Matérias em que a comunidade reclama, cobra ou pede providências">📣 Pautas da comunidade <span class="n">0</span></button>
     <button class="btn-pautas btn-agenda" id="btn-agenda" type="button" title="Cursos, treinamentos, palestras e eventos">🎓 Cursos e eventos <span class="n">0</span></button>
+    <button class="btn-arquivadas btn-lote" id="btn-lote" type="button">🎨 Lote <span class="n">0</span></button>
     <button class="btn-arquivadas" id="btn-lerdepois" type="button">🔖 Ler depois <span class="n">0</span></button>
     <button class="btn-arquivadas" id="btn-arquivadas" type="button">Arquivadas <span class="n">0</span></button>
   </div>
   <div class="seletores sub-agenda" id="sub-agenda" hidden>
     <button class="seletor" id="sel-formato" aria-haspopup="dialog"><span class="seletor-rotulo">Formato</span><span class="seletor-valor">Todos</span><span class="seta">▾</span></button>
     <button class="seletor" id="sel-tema" aria-haspopup="dialog"><span class="seletor-rotulo">Tema</span><span class="seletor-valor">Todos</span><span class="seta">▾</span></button>
+  </div>
+  <div class="barra-lote" id="barra-lote" hidden>
+    <p class="barra-lote-texto">Matérias separadas para o ORBIS. Envie todas de uma vez ou uma por uma pelo botão amarelo de cada uma.</p>
+    <div class="barra-lote-botoes" id="barra-lote-botoes"></div>
   </div>
   <p class="resumo-contagem" id="contagem"></p>
   <div id="lista" class="lista" aria-live="polite"></div>
@@ -136,6 +141,7 @@
         <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="m8.6 13.5 6.8 4M15.4 6.5l-6.8 4"/></svg>
         Compartilhar
       </button>
+      <button class="acao addlote" type="button" title="Separar para gerar carrossel em lote"><span>➕ Lote</span></button>
       <button class="acao lerdepois" type="button" title="Ler depois (ou arraste para a direita)">
         <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12v18l-6-4-6 4z"/></svg>
         <span>Ler depois</span>

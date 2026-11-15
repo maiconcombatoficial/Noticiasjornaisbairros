@@ -9,12 +9,19 @@
     atualizado: $('#atualizado'), fontesOk: $('#fontes-ok'), btnAtualizar: $('#btn-atualizar'), btnFontes: $('#btn-fontes'),
     dlg: $('#dlg-fontes'), fecharFontes: $('#fechar-fontes'), listaFontes: $('#lista-fontes'), tpl: $('#tpl-card'),
     puxar: $('#puxar'), puxarTexto: $('.puxar-texto'), avisoVersao: $('#aviso-versao'), btnVersao: $('#btn-versao'), toast: $('#toast'), versao: $('#versao'),
-    toastTexto: $('#toast-texto'), toastAcao: $('#toast-acao'), btnArquivadas: $('#btn-arquivadas'), btnLerDepois: $('#btn-lerdepois'), btnPautas: $('#btn-pautas'), btnAgenda: $('#btn-agenda'), subAgenda: $('#sub-agenda'), selFormato: $('#sel-formato'), selTema: $('#sel-tema'),
+    toastTexto: $('#toast-texto'), toastAcao: $('#toast-acao'), btnArquivadas: $('#btn-arquivadas'), btnLerDepois: $('#btn-lerdepois'), btnLote: $('#btn-lote'), barraLote: $('#barra-lote'), barraLoteBotoes: $('#barra-lote-botoes'), btnPautas: $('#btn-pautas'), btnAgenda: $('#btn-agenda'), subAgenda: $('#sub-agenda'), selFormato: $('#sel-formato'), selTema: $('#sel-tema'),
   };
-  const APP_VERSAO = '1.18';
+  const APP_VERSAO = '1.19';
   const PAGINA = 40;
   // Botão "Gerar carrossel": abre o WhatsApp do ORBIS com o pedido já escrito (padrão Maicon Combat)
   const CARROSSEL_WHATSAPP = '5548996102910'; // +55 48 99610-2910
+  const LOTE_POR_MENSAGEM = 8; // mensagens muito longas podem ser cortadas pelo WhatsApp
+  function linkCarrosselLote(itens, parte, partes) {
+    const cabeca = `ORBIS, gerar carrossel no padrão Maicon Combat a partir de cada uma destas ${itens.length} matérias (um carrossel por matéria)` +
+      (partes > 1 ? ` · parte ${parte} de ${partes}` : '') + ':\n\n';
+    const corpo = itens.map((n, i) => `${i + 1}. 📰 ${n.titulo}\n🔗 ${n.url}`).join('\n\n');
+    return `https://wa.me/${CARROSSEL_WHATSAPP}?text=${encodeURIComponent(cabeca + corpo)}`;
+  }
   function linkCarrossel(n) {
     const comando = 'ORBIS, gerar carrossel no padrão Maicon Combat a partir desta matéria:\n\n' +
       '📰 ' + n.titulo + '\n' +
@@ -74,12 +81,14 @@
     const salvar = () => { try { localStorage.setItem(chave, JSON.stringify([...porId.values()])); } catch { /* sem armazenamento */ } };
     return {
       tem: (n) => porId.has(n.id) || porTitulo.has(chaveTitulo(n.titulo)),
+      quando: (n) => (porId.get(n.id) || porTitulo.get(chaveTitulo(n.titulo)) || {}).q || 0,
       adicionar(n) { const x = { id: n.id, t: chaveTitulo(n.titulo), q: Date.now() }; porId.set(x.id, x); porTitulo.set(x.t, x); salvar(); },
       remover(n) { const t = chaveTitulo(n.titulo); for (const [k, x] of porId) if (x.id === n.id || x.t === t) porId.delete(k); porTitulo.delete(t); salvar(); },
     };
   }
   const arquivadas = listaLocal('fpb-arquivadas');
   const lerDepois = listaLocal('fpb-ler-depois');
+  const lote = listaLocal('fpb-lote-carrossel');
   const estaArquivada = (n) => arquivadas.tem(n);
 
   // ---------- estado na URL (#/regiao/bairro?q=) ----------
@@ -118,10 +127,15 @@
   // ---------- filtragem ----------
   function naVisao(n) {
     if (estado.visao === 'arquivadas') return estaArquivada(n);
-    if (estado.visao === 'lerdepois') return lerDepois.tem(n) && !estaArquivada(n);
-    return !estaArquivada(n) && !lerDepois.tem(n); // guardada em Ler depois sai da lista principal
+    if (estado.visao === 'lote') return lote.tem(n) && !estaArquivada(n);
+    if (estado.visao === 'lerdepois') return lerDepois.tem(n) && !estaArquivada(n) && !lote.tem(n);
+    return !estaArquivada(n) && !lerDepois.tem(n) && !lote.tem(n); // separada (ler depois / lote) sai da lista principal
+  }
+  function itensDoLote() {
+    return dados.noticias.filter((n) => lote.tem(n) && !estaArquivada(n)).sort((a, b) => lote.quando(a) - lote.quando(b));
   }
   function filtrar() {
+    if (estado.visao === 'lote') return itensDoLote(); // o lote ignora filtros: mostra (e envia) tudo o que foi separado
     const limite = estado.horas ? Date.now() - estado.horas * 3600e3 : 0;
     const q = norm(estado.q.trim());
     const termosBairro = q ? [...mapaBairro.values()].filter((b) => norm(b.nome).includes(q)).map((b) => b.id) : [];
@@ -287,7 +301,23 @@
     const a = $('.card-link', frag); a.href = n.url;
     const btCarrossel = $('.carrossel', frag);
     btCarrossel.href = linkCarrossel(n);
-    btCarrossel.addEventListener('click', (e) => e.stopPropagation());
+    btCarrossel.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (estado.visao !== 'lote') return;
+      // enviada do lote: sai do lote e vai para Arquivadas (o WhatsApp abre normalmente)
+      setTimeout(() => {
+        lote.remover(n); arquivadas.adicionar(n);
+        toast('Enviada ao ORBIS e arquivada', 5000, { rotulo: 'Desfazer', ao: () => { arquivadas.remover(n); lote.adicionar(n); render(); } });
+        render();
+      }, 300);
+    });
+    const btLote = $('.addlote', frag);
+    $('span', btLote).textContent = estado.visao === 'lote' ? '↩ Tirar do lote' : '➕ Lote';
+    btLote.onclick = (e) => {
+      e.preventDefault(); e.stopPropagation();
+      if (estado.visao === 'lote') executar(acaoTirarLote, 1);
+      else executar(acaoLote, -1);
+    };
     const btCopiar = $('.copiar', frag);
     btCopiar.onclick = async (e) => {
       e.preventDefault(); e.stopPropagation();
@@ -305,8 +335,11 @@
     const acaoRestaurar = { rotulo: 'Restaurar', cor: '#10b981', executar: () => { arquivadas.remover(n); toast('Notícia restaurada'); } };
     const acaoSalvar = { rotulo: 'Ler depois', cor: '#0b5fff', executar: () => { lerDepois.adicionar(n); toast('Guardada em Ler depois', 4000, { rotulo: 'Desfazer', ao: () => { lerDepois.remover(n); render(); } }); } };
     const acaoRemover = { rotulo: 'Devolver', cor: '#64748b', executar: () => { lerDepois.remover(n); toast('Devolvida à lista principal', 4000, { rotulo: 'Desfazer', ao: () => { lerDepois.adicionar(n); render(); } }); } };
+    const acaoLote = { rotulo: 'Lote', cor: '#ca8a04', executar: () => { lote.adicionar(n); toast('Separada para o lote', 4000, { rotulo: 'Desfazer', ao: () => { lote.remover(n); render(); } }); } };
+    const acaoTirarLote = { rotulo: 'Tirar do lote', cor: '#64748b', executar: () => { lote.remover(n); toast('Devolvida à lista principal', 4000, { rotulo: 'Desfazer', ao: () => { lote.adicionar(n); render(); } }); } };
     let esquerda = null, direita = null;
-    if (estado.visao === 'arquivadas') { direita = acaoRestaurar; }
+    if (estado.visao === 'lote') { esquerda = acaoArquivar; direita = acaoTirarLote; }
+    else if (estado.visao === 'arquivadas') { direita = acaoRestaurar; }
     else if (estado.visao === 'lerdepois') { esquerda = acaoArquivar; direita = acaoRemover; }
     else { esquerda = acaoArquivar; direita = acaoSalvar; }
     $('span', btArquivar).textContent = estado.visao === 'arquivadas' ? 'Restaurar' : 'Arquivar';
@@ -410,8 +443,10 @@
   }
   function renderLista(itens) {
     el.lista.innerHTML = '';
-    const mostrar = itens.slice(0, estado.pagina * PAGINA);
-    if (estado.agenda && !estado.pauta && mostrar.length) {
+    const mostrar = estado.visao === 'lote' ? itens : itens.slice(0, estado.pagina * PAGINA);
+    if (estado.visao === 'lote') {
+      mostrar.forEach((n, i) => { const c = card(n); const t = c.querySelector('.titulo'); if (t) t.prepend(`${i + 1}. `); el.lista.appendChild(c); });
+    } else if (estado.agenda && !estado.pauta && mostrar.length) {
       // Cursos e eventos: agrupados por tema (ou por formato, quando um tema já foi escolhido)
       const porTema = !estado.tema;
       const grupos = new Map();
@@ -452,7 +487,9 @@
     el.vazio.hidden = itens.length > 0;
     el.mais.hidden = mostrar.length >= itens.length;
     if (!itens.length) {
-      el.vazioDica.textContent = estado.visao === 'arquivadas'
+      el.vazioDica.textContent = estado.visao === 'lote'
+        ? 'Toque em "➕ Lote" nas notícias para separá-las aqui. Depois envie todas de uma vez ao ORBIS.'
+        : estado.visao === 'arquivadas'
         ? 'Arraste uma notícia para a esquerda (ou toque em Arquivar) para guardá-la aqui.'
         : estado.visao === 'lerdepois'
         ? 'Arraste uma notícia para a direita (ou toque em Ler depois) para guardá-la aqui. Daqui, arrastar para a direita devolve à lista e para a esquerda arquiva.'
@@ -466,6 +503,34 @@
     if (g.rid) return `${mapaRegiao.get(g.rid).nome} · sem bairro identificado`;
     return 'Florianópolis · sem bairro identificado';
   }
+  function renderBarraLote(itens) {
+    el.barraLoteBotoes.innerHTML = '';
+    const partes = Math.ceil(itens.length / LOTE_POR_MENSAGEM);
+    for (let p = 0; p < partes; p++) {
+      const grupo = itens.slice(p * LOTE_POR_MENSAGEM, (p + 1) * LOTE_POR_MENSAGEM);
+      const a = document.createElement('a');
+      a.href = linkCarrosselLote(grupo, p + 1, partes); a.target = '_blank'; a.rel = 'noopener';
+      a.textContent = partes > 1 ? `📤 Enviar parte ${p + 1} de ${partes} (${grupo.length})` : `📤 Enviar lote ao ORBIS (${grupo.length})`;
+      a.addEventListener('click', () => {
+        // enviadas: saem do lote e vão para Arquivadas
+        setTimeout(() => {
+          for (const n of grupo) { lote.remover(n); arquivadas.adicionar(n); }
+          toast(`${grupo.length} ${grupo.length === 1 ? 'matéria enviada' : 'matérias enviadas'} ao ORBIS e arquivadas`, 6000, {
+            rotulo: 'Desfazer', ao: () => { for (const n of grupo) { arquivadas.remover(n); lote.adicionar(n); } render(); },
+          });
+          render();
+        }, 300);
+      });
+      el.barraLoteBotoes.appendChild(a);
+    }
+    const limpar = document.createElement('button'); limpar.type = 'button'; limpar.textContent = 'Devolver todas';
+    limpar.onclick = () => {
+      for (const n of itens) lote.remover(n);
+      toast('Lote esvaziado; matérias devolvidas à lista', 5000, { rotulo: 'Desfazer', ao: () => { for (const n of itens) lote.adicionar(n); render(); } });
+      render();
+    };
+    el.barraLoteBotoes.appendChild(limpar);
+  }
   function render() {
     gravarHash();
     const c = contar();
@@ -473,6 +538,11 @@
     renderSeletores(c);
     el.btnArquivadas.classList.toggle('ativo', estado.visao === 'arquivadas');
     $('.n', el.btnArquivadas).textContent = dados.noticias.filter(estaArquivada).length;
+    const doLote = itensDoLote();
+    el.btnLote.classList.toggle('ativo', estado.visao === 'lote');
+    $('.n', el.btnLote).textContent = doLote.length;
+    el.barraLote.hidden = estado.visao !== 'lote' || !doLote.length;
+    if (estado.visao === 'lote' && doLote.length) renderBarraLote(doLote);
     el.btnLerDepois.classList.toggle('ativo', estado.visao === 'lerdepois');
     $('.n', el.btnLerDepois).textContent = dados.noticias.filter((n) => lerDepois.tem(n) && !estaArquivada(n)).length;
     el.btnPautas.classList.toggle('ativo', estado.pauta);
@@ -487,7 +557,7 @@
     const itens = filtrar();
     const onde = estado.bairro ? mapaBairro.get(estado.bairro)?.nome : estado.regiao === 'todas' ? 'Florianópolis' : mapaRegiao.get(estado.regiao)?.nome;
     const assuntoNome = estado.assunto ? mapaAssunto.get(estado.assunto)?.nome : '';
-    el.contagem.textContent = `${itens.length} ${itens.length === 1 ? 'notícia' : 'notícias'}${estado.visao === 'arquivadas' ? (itens.length === 1 ? ' arquivada' : ' arquivadas') : estado.visao === 'lerdepois' ? ' para ler depois' : ''} · ${onde}${estado.pauta ? ' · Pautas da comunidade' : ''}${estado.agenda ? ' · Cursos e eventos' : ''}${estado.agenda && estado.formato ? ` · ${mapaAgenda.get(estado.formato)?.nome}` : ''}${estado.agenda && estado.tema ? ` · ${mapaTema.get(estado.tema)?.nome}` : ''}${assuntoNome ? ` · ${assuntoNome}` : ''}${estado.q ? ` · “${estado.q}”` : ''}`;
+    el.contagem.textContent = `${itens.length} ${itens.length === 1 ? 'notícia' : 'notícias'}${estado.visao === 'arquivadas' ? (itens.length === 1 ? ' arquivada' : ' arquivadas') : estado.visao === 'lerdepois' ? ' para ler depois' : estado.visao === 'lote' ? (itens.length === 1 ? ' no lote de carrosséis' : ' no lote de carrosséis') : ''}${estado.visao === 'lote' ? '' : ` · ${onde}`}${estado.pauta ? ' · Pautas da comunidade' : ''}${estado.agenda ? ' · Cursos e eventos' : ''}${estado.agenda && estado.formato ? ` · ${mapaAgenda.get(estado.formato)?.nome}` : ''}${estado.agenda && estado.tema ? ` · ${mapaTema.get(estado.tema)?.nome}` : ''}${assuntoNome ? ` · ${assuntoNome}` : ''}${estado.q ? ` · “${estado.q}”` : ''}`;
     renderLista(itens);
   }
   let toastTimer;
@@ -567,6 +637,7 @@
   el.btnAgenda.addEventListener('click', () => { estado.agenda = !estado.agenda; if (!estado.agenda) { estado.formato = ''; estado.tema = ''; } estado.pagina = 1; render(); });
   el.btnPautas.addEventListener('click', () => { estado.pauta = !estado.pauta; estado.pagina = 1; render(); });
   el.btnArquivadas.addEventListener('click', () => { estado.visao = estado.visao === 'arquivadas' ? 'normal' : 'arquivadas'; estado.pagina = 1; render(); window.scrollTo({ top: 0 }); });
+  el.btnLote.addEventListener('click', () => { estado.visao = estado.visao === 'lote' ? 'normal' : 'lote'; estado.pagina = 1; render(); window.scrollTo({ top: 0 }); });
   el.btnLerDepois.addEventListener('click', () => { estado.visao = estado.visao === 'lerdepois' ? 'normal' : 'lerdepois'; estado.pagina = 1; render(); window.scrollTo({ top: 0 }); });
   el.incluirGeral.addEventListener('change', () => { estado.incluirGeral = el.incluirGeral.checked; estado.pagina = 1; render(); });
   el.mais.addEventListener('click', () => { estado.pagina++; render(); });
