@@ -11,8 +11,16 @@
     puxar: $('#puxar'), puxarTexto: $('.puxar-texto'), avisoVersao: $('#aviso-versao'), btnVersao: $('#btn-versao'), toast: $('#toast'), versao: $('#versao'),
     toastTexto: $('#toast-texto'), toastAcao: $('#toast-acao'), btnArquivadas: $('#btn-arquivadas'), btnLerDepois: $('#btn-lerdepois'), btnPautas: $('#btn-pautas'), btnAgenda: $('#btn-agenda'), subAgenda: $('#sub-agenda'), selFormato: $('#sel-formato'), selTema: $('#sel-tema'),
   };
-  const APP_VERSAO = '1.17';
+  const APP_VERSAO = '1.18';
   const PAGINA = 40;
+  // Botão "Gerar carrossel": abre o WhatsApp do ORBIS com o pedido já escrito (padrão Maicon Combat)
+  const CARROSSEL_WHATSAPP = '5548996102910'; // +55 48 99610-2910
+  function linkCarrossel(n) {
+    const comando = 'ORBIS, gerar carrossel no padrão Maicon Combat a partir desta matéria:\n\n' +
+      '📰 ' + n.titulo + '\n' +
+      '🔗 ' + n.url;
+    return `https://wa.me/${CARROSSEL_WHATSAPP}?text=${encodeURIComponent(comando)}`;
+  }
   const estado = { regiao: 'todas', bairro: '', assunto: '', q: '', horas: 72, incluirGeral: true, pagina: 1, visao: 'normal', pauta: false, agenda: false, formato: '', tema: '' };
   let dados = { noticias: [], contagem: { regioes: {}, bairros: {} } };
   let cfg = { regioes: [] };
@@ -277,6 +285,9 @@
   function card(n) {
     const frag = el.tpl.content.cloneNode(true);
     const a = $('.card-link', frag); a.href = n.url;
+    const btCarrossel = $('.carrossel', frag);
+    btCarrossel.href = linkCarrossel(n);
+    btCarrossel.addEventListener('click', (e) => e.stopPropagation());
     const btCopiar = $('.copiar', frag);
     btCopiar.onclick = async (e) => {
       e.preventDefault(); e.stopPropagation();

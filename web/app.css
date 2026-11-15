@@ -88,6 +88,8 @@ button { font: inherit; color: inherit; cursor: pointer; }
 .card-movel.animando { transition: transform .25s ease, opacity .25s ease; }
 .card-fundo { position: absolute; inset: 0; border-radius: var(--raio); display: flex; align-items: center; justify-content: flex-end; padding: 0 22px; font-weight: 700; color: #fff; background: var(--superficie-2); }
 .card-acoes { flex-wrap: wrap; }
+.acao.carrossel { background: #ffcc18; border-color: #ffcc18; color: #0a0a0a; font-weight: 700; text-decoration: none; transition: transform .15s ease, box-shadow .15s ease; }
+.acao.carrossel:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,.3); }
 .acao.salvo { border-color: var(--primaria); color: var(--primaria); }
 .tag.salvo { background: color-mix(in srgb, var(--primaria) 18%, transparent); color: var(--primaria); }
 .btn-pautas { border: 1px solid var(--borda); background: var(--superficie); border-radius: 999px; padding: 6px 12px; font-size: .85rem; color: var(--texto); font-weight: 600; }
