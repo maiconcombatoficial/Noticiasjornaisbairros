@@ -11,22 +11,27 @@
     puxar: $('#puxar'), puxarTexto: $('.puxar-texto'), avisoVersao: $('#aviso-versao'), btnVersao: $('#btn-versao'), toast: $('#toast'), versao: $('#versao'),
     toastTexto: $('#toast-texto'), toastAcao: $('#toast-acao'), btnArquivadas: $('#btn-arquivadas'), btnLerDepois: $('#btn-lerdepois'), btnLote: $('#btn-lote'), barraLote: $('#barra-lote'), barraLoteBotoes: $('#barra-lote-botoes'), btnPautas: $('#btn-pautas'), btnAgenda: $('#btn-agenda'), subAgenda: $('#sub-agenda'), selFormato: $('#sel-formato'), selTema: $('#sel-tema'),
   };
-  const APP_VERSAO = '1.20';
+  const APP_VERSAO = '1.21';
   const PAGINA = 40;
-  // Botão "Gerar carrossel": abre o WhatsApp do ORBIS com o pedido já escrito (padrão Maicon Combat)
+  // Botão "Gerar carrossel": abre o WhatsApp do @Orbis com o pedido já escrito (padrão Maicon Combat)
   const CARROSSEL_WHATSAPP = '5548996102910'; // +55 48 99610-2910
   const LOTE_POR_MENSAGEM = 8; // mensagens muito longas podem ser cortadas pelo WhatsApp
-  function linkCarrosselLote(itens, parte, partes) {
-    const cabeca = `ORBIS, gerar carrossel no padrão Maicon Combat a partir de cada uma destas ${itens.length} matérias (um carrossel por matéria)` +
-      (partes > 1 ? ` · parte ${parte} de ${partes}` : '') + ':\n\n';
-    const corpo = itens.map((n, i) => `${i + 1}. 📰 ${n.titulo}\n🔗 ${n.url}`).join('\n\n');
-    return `https://wa.me/${CARROSSEL_WHATSAPP}?text=${encodeURIComponent(cabeca + corpo)}`;
-  }
-  function linkCarrossel(n) {
-    const comando = 'ORBIS, gerar carrossel no padrão Maicon Combat a partir desta matéria:\n\n' +
+  // Texto do pedido ao Orbis (o mesmo no WhatsApp e no botão de copiar)
+  function textoCarrossel(n) {
+    return '@Orbis gerar carrossel no padrão Maicon Combat a partir desta matéria:\n\n' +
       '📰 ' + n.titulo + '\n' +
       '🔗 ' + n.url;
-    return `https://wa.me/${CARROSSEL_WHATSAPP}?text=${encodeURIComponent(comando)}`;
+  }
+  function textoCarrosselLote(itens, parte = 1, partes = 1) {
+    const cabeca = `@Orbis gerar carrossel no padrão Maicon Combat a partir de cada uma destas ${itens.length} matérias (um carrossel por matéria)` +
+      (partes > 1 ? ` · parte ${parte} de ${partes}` : '') + ':\n\n';
+    return cabeca + itens.map((n, i) => `${i + 1}. 📰 ${n.titulo}\n🔗 ${n.url}`).join('\n\n');
+  }
+  function linkCarrosselLote(itens, parte, partes) {
+    return `https://wa.me/${CARROSSEL_WHATSAPP}?text=${encodeURIComponent(textoCarrosselLote(itens, parte, partes))}`;
+  }
+  function linkCarrossel(n) {
+    return `https://wa.me/${CARROSSEL_WHATSAPP}?text=${encodeURIComponent(textoCarrossel(n))}`;
   }
   const estado = { regiao: 'todas', bairro: '', assunto: '', q: '', horas: 72, incluirGeral: true, pagina: 1, visao: 'normal', pauta: false, agenda: false, formato: '', tema: '' };
   let dados = { noticias: [], contagem: { regioes: {}, bairros: {} } };
@@ -307,10 +312,26 @@
       // enviada do lote: sai do lote e vai para Arquivadas (o WhatsApp abre normalmente)
       setTimeout(() => {
         lote.remover(n); arquivadas.adicionar(n);
-        toast('Enviada ao ORBIS e arquivada', 5000, { rotulo: 'Desfazer', ao: () => { arquivadas.remover(n); lote.adicionar(n); render(); } });
+        toast('Enviada ao @Orbis e arquivada', 5000, { rotulo: 'Desfazer', ao: () => { arquivadas.remover(n); lote.adicionar(n); render(); } });
         render();
       }, 300);
     });
+    // Copiar o pedido ao Orbis (para colar em qualquer conversa ou grupo)
+    const btCopiarCarrossel = $('.copiar-carrossel', frag);
+    btCopiarCarrossel.onclick = async (e) => {
+      e.preventDefault(); e.stopPropagation();
+      const ok = await copiarTexto(textoCarrossel(n));
+      if (!ok) { toast('Não consegui copiar; tente de novo'); return; }
+      btCopiarCarrossel.classList.add('ok'); $('span', btCopiarCarrossel).textContent = '✓ Copiado';
+      setTimeout(() => { btCopiarCarrossel.classList.remove('ok'); $('span', btCopiarCarrossel).textContent = '📋 Copiar link para Carrossel'; }, 1800);
+      if (estado.visao === 'lote') {
+        toast('Copiado. Cole na conversa com o @Orbis', 6000, { rotulo: 'Marcar enviada', ao: () => {
+          lote.remover(n); arquivadas.adicionar(n);
+          toast('Marcada como enviada e arquivada', 5000, { rotulo: 'Desfazer', ao: () => { arquivadas.remover(n); lote.adicionar(n); render(); } });
+          render();
+        } });
+      } else toast('Copiado. Cole na conversa com o @Orbis');
+    };
     const btLote = $('.addlote', frag);
     $('span', btLote).textContent = estado.visao === 'lote' ? '↩ Tirar do Carrossel em Lote' : '➕ Carrossel em Lote';
     btLote.onclick = (e) => {
@@ -488,7 +509,7 @@
     el.mais.hidden = mostrar.length >= itens.length;
     if (!itens.length) {
       el.vazioDica.textContent = estado.visao === 'lote'
-        ? 'Toque em "➕ Carrossel em Lote" nas notícias para separá-las aqui. Depois envie todas de uma vez ao ORBIS.'
+        ? 'Toque em "➕ Carrossel em Lote" nas notícias para separá-las aqui. Depois envie todas de uma vez ao @Orbis.'
         : estado.visao === 'arquivadas'
         ? 'Arraste uma notícia para a esquerda (ou toque em Arquivar) para guardá-la aqui.'
         : estado.visao === 'lerdepois'
@@ -510,12 +531,12 @@
       const grupo = itens.slice(p * LOTE_POR_MENSAGEM, (p + 1) * LOTE_POR_MENSAGEM);
       const a = document.createElement('a');
       a.href = linkCarrosselLote(grupo, p + 1, partes); a.target = '_blank'; a.rel = 'noopener';
-      a.textContent = partes > 1 ? `📤 Enviar parte ${p + 1} de ${partes} (${grupo.length})` : `📤 Enviar Carrossel em Lote ao ORBIS (${grupo.length})`;
+      a.textContent = partes > 1 ? `📤 Enviar parte ${p + 1} de ${partes} (${grupo.length})` : `📤 Enviar Carrossel em Lote ao @Orbis (${grupo.length})`;
       a.addEventListener('click', () => {
         // enviadas: saem do lote e vão para Arquivadas
         setTimeout(() => {
           for (const n of grupo) { lote.remover(n); arquivadas.adicionar(n); }
-          toast(`${grupo.length} ${grupo.length === 1 ? 'matéria enviada' : 'matérias enviadas'} ao ORBIS e arquivadas`, 6000, {
+          toast(`${grupo.length} ${grupo.length === 1 ? 'matéria enviada' : 'matérias enviadas'} ao @Orbis e arquivadas`, 6000, {
             rotulo: 'Desfazer', ao: () => { for (const n of grupo) { arquivadas.remover(n); lote.adicionar(n); } render(); },
           });
           render();
@@ -523,6 +544,18 @@
       });
       el.barraLoteBotoes.appendChild(a);
     }
+    const copiar = document.createElement('button'); copiar.type = 'button'; copiar.className = 'copiar-lote';
+    copiar.textContent = `📋 Copiar Carrossel em Lote (${itens.length})`;
+    copiar.onclick = async () => {
+      const ok = await copiarTexto(textoCarrosselLote(itens)); // copiar não tem limite de tamanho: vai tudo numa mensagem só
+      if (!ok) { toast('Não consegui copiar; tente de novo'); return; }
+      toast(`${itens.length} ${itens.length === 1 ? 'matéria copiada' : 'matérias copiadas'}. Cole na conversa com o @Orbis`, 7000, { rotulo: 'Marcar enviadas', ao: () => {
+        for (const n of itens) { lote.remover(n); arquivadas.adicionar(n); }
+        toast('Marcadas como enviadas e arquivadas', 5000, { rotulo: 'Desfazer', ao: () => { for (const n of itens) { arquivadas.remover(n); lote.adicionar(n); } render(); } });
+        render();
+      } });
+    };
+    el.barraLoteBotoes.appendChild(copiar);
     const limpar = document.createElement('button'); limpar.type = 'button'; limpar.textContent = 'Devolver todas';
     limpar.onclick = () => {
       for (const n of itens) lote.remover(n);

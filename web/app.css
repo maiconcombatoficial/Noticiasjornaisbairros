@@ -89,6 +89,8 @@ button { font: inherit; color: inherit; cursor: pointer; }
 .card-fundo { position: absolute; inset: 0; border-radius: var(--raio); display: flex; align-items: center; justify-content: flex-end; padding: 0 22px; font-weight: 700; color: #fff; background: var(--superficie-2); }
 .card-acoes { flex-wrap: wrap; }
 .acao.carrossel { background: #ffcc18; border-color: #ffcc18; color: #0a0a0a; font-weight: 700; text-decoration: none; transition: transform .15s ease, box-shadow .15s ease; }
+.acao.carrossel.ok { background: #10b981; border-color: #10b981; color: #fff; }
+.barra-lote-botoes button.copiar-lote { background: transparent; border: 2px solid #ffcc18; color: var(--texto); }
 .acao.carrossel:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,.3); }
 .acao.addlote { border-color: #ffcc18; color: var(--texto); }
 .btn-lote.ativo { background: #ffcc18; border-color: #ffcc18; color: #0a0a0a; }
